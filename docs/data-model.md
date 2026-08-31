@@ -70,6 +70,10 @@
 - 检票口、车厢、座位
 - 取票或乘车凭证说明
 - 订单号（敏感）
+- bookingStatus：waiting_to_book / ticketed；`waiting_to_book` 对应用户可见状态“待抢票”
+- expectedSaleAt：预计开售时间，可为空，不得由系统在无可靠依据时自动填充
+- preferredSeatClasses：期望席别，可多选
+- bookingReminderId：关联开售提醒，可为空
 
 ### 酒店 HotelDetail
 
@@ -154,3 +158,4 @@
 - 交通项目允许起终点使用不同时区。
 - 删除默认软删除，附件根据保留策略延迟清理。
 - 自动识别结果在用户确认前不得进入正式行程。
+- “待抢票”是火车 / 高铁的预订状态，独立于项目的时间运行状态；出票后必须保留同一项目并更新为 ticketed，避免生成重复行程。
