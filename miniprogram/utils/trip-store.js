@@ -139,6 +139,7 @@ function deleteItem(tripId, itemId) {
 }
 
 module.exports = {
+  ensureSeedData,
   getTrips,
   getTrip,
   saveTrip,
