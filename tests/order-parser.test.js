@@ -19,6 +19,32 @@ assert.strictEqual(train.seatClass, '二等座')
 assert.strictEqual(train.startTime, '08:30')
 assert.strictEqual(train.endTime, '09:16')
 
+const trainSearchScreenshot = parseOrderText([
+  '3:56',
+  '10月02日 周五出发',
+  '11:29',
+  '上海虹桥站',
+  '26分',
+  'G7316 经停',
+  '11:55',
+  '苏州站',
+  '携程·超级秒杀 9月18日13:45开售',
+  '二等座 一等座 商务座 无座',
+  '预约购票 开售自动抢'
+].join('\n'))
+assert.strictEqual(trainSearchScreenshot.type, 'train')
+assert.strictEqual(trainSearchScreenshot.date, '2026-10-02')
+assert.strictEqual(trainSearchScreenshot.startTime, '11:29')
+assert.strictEqual(trainSearchScreenshot.endTime, '11:55')
+assert.strictEqual(trainSearchScreenshot.transportNo, 'G7316')
+assert.strictEqual(trainSearchScreenshot.locationStart, '上海虹桥站')
+assert.strictEqual(trainSearchScreenshot.locationEnd, '苏州站')
+assert.strictEqual(trainSearchScreenshot.locationStartCity, '上海')
+assert.strictEqual(trainSearchScreenshot.locationEndCity, '苏州')
+assert.strictEqual(trainSearchScreenshot.title, '上海 → 苏州')
+assert.strictEqual(trainSearchScreenshot.expectedSaleAt, '2026-09-18 13:45')
+assert.strictEqual(trainSearchScreenshot.seatClass, '')
+
 const hotel = parseOrderText('上海外滩华尔道夫酒店 入住 2026年10月1日 退房 2026年10月3日 豪华双床房 城市：上海')
 assert.strictEqual(hotel.type, 'hotel')
 assert.strictEqual(hotel.title, '上海外滩华尔道夫酒店')
