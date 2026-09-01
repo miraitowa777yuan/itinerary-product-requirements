@@ -235,15 +235,32 @@ Page({
     this._ocrResolve = null
     this._ocrReject = null
     this._ocrChunks = []
+    this._ocrAnchorOrder = 0
     this._ocrRequestToken = (this._ocrRequestToken || 0) + 1
   },
 
   handleOcrAnchors(anchors) {
     if (!this._ocrResolve || !Array.isArray(anchors) || !anchors.length) return
     if (!Array.isArray(this._ocrChunks)) this._ocrChunks = []
-    anchors.forEach(anchor => {
+    if (!Number.isFinite(this._ocrAnchorOrder)) this._ocrAnchorOrder = 0
+    anchors.map(anchor => {
       const chunk = String(anchor.text || anchor.subtext || '').trim()
-      if (chunk && !this._ocrChunks.includes(chunk)) this._ocrChunks.push(chunk)
+      if (!chunk) return null
+      const boxPoint = anchor.box && anchor.box[0]
+      const x = Number.isFinite(anchor.centerX) ? anchor.centerX : (boxPoint && Number(boxPoint.x))
+      const y = Number.isFinite(anchor.centerY) ? anchor.centerY : (boxPoint && Number(boxPoint.y))
+      return { text: chunk, x: Number.isFinite(x) ? x : null, y: Number.isFinite(y) ? y : null, order: this._ocrAnchorOrder++ }
+    }).filter(Boolean).forEach(item => {
+      if (!this._ocrChunks.some(existing => (existing.text || existing) === item.text)) this._ocrChunks.push(item)
+    })
+    this._ocrChunks.sort((left, right) => {
+      const leftY = Number.isFinite(left.y) ? left.y : Infinity
+      const rightY = Number.isFinite(right.y) ? right.y : Infinity
+      if (leftY !== rightY) return leftY - rightY
+      const leftX = Number.isFinite(left.x) ? left.x : Infinity
+      const rightX = Number.isFinite(right.x) ? right.x : Infinity
+      if (leftX !== rightX) return leftX - rightX
+      return (left.order || 0) - (right.order || 0)
     })
     if (!this._ocrChunks.length) return
     if (this._ocrResultTimer) clearTimeout(this._ocrResultTimer)
@@ -252,7 +269,7 @@ Page({
 
   completeOcrRecognition() {
     if (!this._ocrResolve || !this._ocrChunks || !this._ocrChunks.length) return
-    const text = this._ocrChunks.join('\n').trim()
+    const text = this._ocrChunks.map(chunk => chunk.text || chunk).join('\n').trim()
     clearTimeout(this._ocrTimer)
     const resolve = this._ocrResolve
     this._ocrResolve = null
@@ -260,6 +277,7 @@ Page({
     this._ocrTimer = null
     this._ocrResultTimer = null
     this._ocrChunks = []
+    this._ocrAnchorOrder = 0
     resolve(text)
   },
 

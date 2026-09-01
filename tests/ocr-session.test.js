@@ -25,6 +25,21 @@ clearTimeout(resultContext._ocrResultTimer)
 pageDefinition.completeOcrRecognition.call(resultContext)
 assert.strictEqual(recognizedText, '上海虹桥站\nG7331\n杭州东站')
 
+let sortedText = ''
+const sortedContext = Object.assign({}, pageDefinition, {
+  _ocrResolve: text => { sortedText = text },
+  _ocrReject: () => {},
+  _ocrChunks: []
+})
+pageDefinition.handleOcrAnchors.call(sortedContext, [
+  { text: '苏州站', centerX: 0.8, centerY: 0.7 },
+  { text: '11:29', centerX: 0.2, centerY: 0.3 },
+  { text: '上海虹桥站', centerX: 0.2, centerY: 0.7 }
+])
+clearTimeout(sortedContext._ocrResultTimer)
+pageDefinition.completeOcrRecognition.call(sortedContext)
+assert.strictEqual(sortedText, '11:29\n上海虹桥站\n苏州站')
+
 let frameCalls = 0
 let nextFrame
 const session = {

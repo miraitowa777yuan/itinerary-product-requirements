@@ -81,6 +81,60 @@ assert.strictEqual(flightScreenshot.date, '2026-09-18')
 assert.strictEqual(flightScreenshot.startTime, '08:20')
 assert.strictEqual(flightScreenshot.endTime, '10:35')
 
+const ctripFlight = parseOrderText([
+  '4:01',
+  '携程旅行 订单详情 已出票',
+  '总计 ¥2200',
+  '10月2日 广州 → 上海',
+  '07:40 白云机场 T3',
+  '国航 CA8566 公务舱',
+  '09:55 浦东机场 T2'
+].join('\n'))
+assert.strictEqual(ctripFlight.type, 'flight')
+assert.strictEqual(ctripFlight.date, '2026-10-02')
+assert.strictEqual(ctripFlight.locationStart, '广州白云国际机场')
+assert.strictEqual(ctripFlight.locationEnd, '上海浦东国际机场')
+assert.strictEqual(ctripFlight.startTime, '07:40')
+assert.strictEqual(ctripFlight.endTime, '09:55')
+assert.strictEqual(ctripFlight.departureTerminal, 'T3')
+assert.strictEqual(ctripFlight.arrivalTerminal, 'T2')
+
+const huazhuHotel = parseOrderText([
+  '3:02',
+  '预订成功 恭候您的入住',
+  '全季大观广州塔琶洲会展酒店',
+  '宸悦路30号1层部分、201房',
+  '09月18日 周五 — 共1晚 — 09月19日 周六',
+  '14:00入住',
+  '14:00离店',
+  '已升级为 臻舍-大床 1间'
+].join('\n'))
+assert.strictEqual(huazhuHotel.type, 'hotel')
+assert.strictEqual(huazhuHotel.title, '全季大观广州塔琶洲会展酒店')
+assert.strictEqual(huazhuHotel.city, '广州')
+assert.strictEqual(huazhuHotel.roomType, '臻舍-大床')
+assert.strictEqual(huazhuHotel.date, '2026-09-18')
+assert.strictEqual(huazhuHotel.checkOutDate, '2026-09-19')
+assert.strictEqual(huazhuHotel.startTime, '14:00')
+assert.strictEqual(huazhuHotel.endTime, '14:00')
+
+const atourHotel = parseOrderText([
+  '4:04',
+  '订单详情 预订成功',
+  '2026-09-05 12:00前可免费取消',
+  '珠海北站宝龙城亚朵酒店',
+  '珠海市香洲区唐家湾镇兴中路395号',
+  '高级大床房 ×1',
+  '入住 2026.09.05',
+  '离店 2026.09.06'
+].join('\n'))
+assert.strictEqual(atourHotel.type, 'hotel')
+assert.strictEqual(atourHotel.title, '珠海北站宝龙城亚朵酒店')
+assert.strictEqual(atourHotel.city, '珠海')
+assert.strictEqual(atourHotel.roomType, '高级大床房')
+assert.strictEqual(atourHotel.date, '2026-09-05')
+assert.strictEqual(atourHotel.checkOutDate, '2026-09-06')
+
 const bus = parseOrderText('城际巴士\n出发地：上海长途客运南站\n目的地：杭州汽车客运中心\n2026年10月1日 08:00')
 assert.strictEqual(bus.type, 'intercity_bus')
 assert.strictEqual(bus.locationStart, '上海长途客运南站')

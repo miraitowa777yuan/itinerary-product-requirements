@@ -66,14 +66,23 @@ function lineTextAt(text, index) {
 
 function findHubPosition(text, hub) {
   if (!hub) return -1
+  const citylessName = hub.name.replace(new RegExp(`^${hub.city}`), '')
   const names = [
     hub.name,
     hub.name.replace(/国际机场$/, ''),
     hub.name.replace(/机场$/, ''),
-    hub.city
+    hub.name.replace(/国际机场$/, '机场'),
+    citylessName,
+    citylessName.replace(/国际机场$/, '机场'),
+    citylessName.replace(/机场$/, '')
   ]
-  const positions = names.map(name => text.indexOf(name)).filter(index => index >= 0)
-  return positions.length ? Math.min(...positions) : -1
+  const namePositions = names
+    .filter(name => name && !/^(国际机场|国际|机场)$/.test(name))
+    .map(name => text.indexOf(name))
+    .filter(index => index >= 0)
+  if (namePositions.length) return Math.min(...namePositions)
+  const cityPosition = text.indexOf(hub.city)
+  return cityPosition >= 0 ? cityPosition : -1
 }
 
 function scoreTravelTime(text, candidate, role, hub) {
@@ -118,6 +127,24 @@ function parseTravelTimes(text, hubs) {
   return [startValue || '', endValue || '']
 }
 
+function findTimeByLabels(text, candidates, labels) {
+  const sameLineMatches = candidates.map(candidate => {
+    const lineStart = text.lastIndexOf('\n', candidate.index) + 1
+    const line = lineTextAt(text, candidate.index)
+    const labelPattern = new RegExp(labels.source, 'g')
+    const distances = []
+    let match
+    while ((match = labelPattern.exec(line))) {
+      distances.push(Math.abs(lineStart + match.index - candidate.index))
+    }
+    return { candidate, distance: distances.length ? Math.min(...distances) : Infinity }
+  }).filter(item => Number.isFinite(item.distance))
+  if (sameLineMatches.length) {
+    return sameLineMatches.sort((a, b) => a.distance - b.distance || a.candidate.index - b.candidate.index)[0].candidate
+  }
+  return undefined
+}
+
 function findDateByLabels(text, dates, labels) {
   const sameLineMatches = dates.map(date => {
     const lineStart = text.lastIndexOf('\n', date.index) + 1
@@ -147,6 +174,24 @@ function findDateByLabels(text, dates, labels) {
     .filter(item => item.distance <= 32)
     .sort((a, b) => a.distance - b.distance || a.date.index - b.date.index)[0]
   return closest ? closest.date : undefined
+}
+
+function findDateOnSameLine(text, dates, labels) {
+  const sameLineMatches = dates.map(date => {
+    const lineStart = text.lastIndexOf('\n', date.index) + 1
+    const nextLine = text.indexOf('\n', date.index)
+    const lineEnd = nextLine >= 0 ? nextLine : text.length
+    const line = text.slice(lineStart, lineEnd)
+    const labelPattern = new RegExp(labels.source, 'g')
+    const distances = []
+    let match
+    while ((match = labelPattern.exec(line))) {
+      distances.push(Math.abs(lineStart + match.index - date.index))
+    }
+    return { date, distance: distances.length ? Math.min(...distances) : Infinity }
+  }).filter(item => Number.isFinite(item.distance))
+  if (!sameLineMatches.length) return undefined
+  return sameLineMatches.sort((a, b) => a.distance - b.distance || a.date.index - b.date.index)[0].date
 }
 
 function findTravelDate(text, dates) {
@@ -184,27 +229,42 @@ function findTransportNo(text, type) {
 
 function findHotelName(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean)
-  const line = lines.find(value => /(酒店|宾馆|旅馆|民宿|Hotel)/i.test(value) && value.length <= 36)
-  if (line) return line
-  const match = text.match(/([\u4e00-\u9fa5A-Za-z0-9·（）()]{2,24}(?:酒店|宾馆|旅馆|民宿|Hotel))/i)
-  return match ? match[1] : ''
+  const pattern = /[\u4e00-\u9fa5A-Za-z0-9·（）()\-－]{2,32}(?:酒店|宾馆|旅馆|民宿|Hotel)/gi
+  const candidates = []
+  lines.forEach(line => {
+    const cleaned = line.replace(/(?:订单详情|酒店详情|酒店名称|房间详情)[:：]?/g, '')
+    let match
+    while ((match = pattern.exec(cleaned))) {
+      const value = match[0].trim()
+      if (!/(订单详情|酒店详情|酒店名称|酒店服务)/.test(value)) candidates.push(value)
+    }
+  })
+  if (candidates.length) return candidates.sort((a, b) => b.length - a.length)[0]
+  const match = text.match(pattern)
+  return match ? match[0] : ''
 }
 
 function findRoomType(text) {
-  const match = text.match(/([^\s\n，,：:]{0,8}(?:大床房|双床房|单人房|家庭房|套房|榻榻米房|公寓房))/)
-  return match ? match[1].replace(/^(房型|客房)[：:\s]*/, '').trim() : ''
+  const pattern = /(?:高级|豪华|舒适|精品|行政|商务|标准|特惠|亲子|家庭|尊享|臻选|臻舍)?[\s·\-－]?(?:大床房|双床房|单人房|家庭房|套房|榻榻米房|公寓房|大床|双床)/g
+  const matches = text.match(pattern) || []
+  return matches.map(value => value.trim().replace(/^[·\-－\s]+/, '')).filter(Boolean).sort((a, b) => b.length - a.length)[0] || ''
 }
 
 function findHotelCity(text, hotelName) {
   const labelled = captureLabelValue(text, ['酒店城市', '所在城市', '入住城市', '目的地', '城市'])
+  const knownCities = Object.keys(CITY_HUBS).sort((a, b) => b.length - a.length)
+  const knownLabelledCity = knownCities.find(city => labelled.includes(city))
+  if (knownLabelledCity) return knownLabelledCity
   const labelledCity = labelled.match(/^([\u4e00-\u9fa5]{2,8}?)(?:市|地区|自治州|$|[ ,，])/)
   if (labelledCity) return labelledCity[1].replace(/省$/, '')
   const address = captureLabelValue(text, ['酒店地址', '地址', '位置'])
+  const knownAddressCity = knownCities.find(city => address.includes(city))
+  if (knownAddressCity) return knownAddressCity
   const addressCity = address.match(/(?:[\u4e00-\u9fa5]{2,8}(?:省|自治区))?([\u4e00-\u9fa5]{2,6})市/)
   if (addressCity) return addressCity[1]
   const cityWithSuffix = text.match(/(?:[\u4e00-\u9fa5]{2,8}(?:省|自治区))?([\u4e00-\u9fa5]{2,6})市(?:[\u4e00-\u9fa5]{0,8}(?:区|县|镇|街|路|道|号))?/)
   if (cityWithSuffix) return cityWithSuffix[1]
-  return Object.keys(CITY_HUBS).find(city => String(hotelName || '').includes(city) || text.includes(city)) || ''
+  return knownCities.find(city => String(hotelName || '').includes(city) || text.includes(city)) || ''
 }
 
 function findStationCity(stationName) {
@@ -219,7 +279,7 @@ function findStationCity(stationName) {
 
 function findTrainHubs(text) {
   const matches = []
-  const stationPattern = /(?:^|[\s\n])([\u4e00-\u9fa5]{2,10}站)(?=$|[\s\n\d>＞→])/g
+  const stationPattern = /([\u4e00-\u9fa5]{2,10}站)/g
   const noise = /^(进站|到站|车站|站点|接送站|始发站|终点站)$/
   let match
   while ((match = stationPattern.exec(text))) {
@@ -233,6 +293,30 @@ function findTrainHubs(text) {
   return matches.sort((a, b) => a.position - b.position)
 }
 
+function parseHotelTimes(text) {
+  const candidates = extractTimes(text)
+  const useful = candidates.filter(candidate => {
+    const line = lineTextAt(text, candidate.index)
+    const isFirstLine = text.lastIndexOf('\n', candidate.index) < 0
+    if (/(取消|政策|支付|订单|客服|出票|开售|放票|发售)/.test(line)) return false
+    if (isFirstLine && !/(入住|到店|离店|退房)/.test(line)) return false
+    return true
+  })
+  const checkIn = findTimeByLabels(text, useful, /(入住|到店)/)
+  const checkOut = findTimeByLabels(text, useful, /(离店|退房)/)
+  const start = checkIn || useful[0]
+  const end = checkOut || useful.find(item => !start || item.index !== start.index)
+  return [start ? start.value : '', end ? end.value : '']
+}
+
+function findTerminalNearHub(text, hub) {
+  const hubPosition = findHubPosition(text, hub)
+  if (hubPosition < 0) return ''
+  const context = lineTextAt(text, hubPosition) || nearbyText(text, hubPosition, 24)
+  const match = context.match(/T[1-9](?:航站楼)?/i)
+  return match ? match[0].toUpperCase() : ''
+}
+
 function findExpectedSaleAt(text) {
   const match = text.match(/((?:20\d{2}[年\/.\-])?\d{1,2}[月\/.\-]\d{1,2}日?)[^\n]{0,16}?([01]?\d|2[0-3])[:：]([0-5]\d)[^\n]{0,8}?(?:开售|放票|发售)/)
   if (!match) return ''
@@ -244,7 +328,9 @@ function parseOrderText(rawText) {
   const type = detectType(text)
   const dates = extractDates(text)
   const hubs = type === 'train' ? findTrainHubs(text) : (type === 'flight' ? findKnownHubsInText(text, type) : [])
-  const times = type === 'flight' || type === 'train' ? parseTravelTimes(text, hubs) : extractTimes(text).slice(0, 2).map(item => item.value)
+  const times = type === 'hotel'
+    ? parseHotelTimes(text)
+    : (type === 'flight' || type === 'train' ? parseTravelTimes(text, hubs) : extractTimes(text).slice(0, 2).map(item => item.value))
   const date = findTravelDate(text, dates)
   const result = {
     type,
@@ -259,6 +345,8 @@ function parseOrderText(rawText) {
     transportNo: findTransportNo(text, type),
     cabinClass: '',
     seatClass: '',
+    departureTerminal: '',
+    arrivalTerminal: '',
     city: '',
     roomType: '',
     checkOutDate: '',
@@ -270,8 +358,11 @@ function parseOrderText(rawText) {
     result.title = findHotelName(text)
     result.city = findHotelCity(text, result.title)
     result.roomType = findRoomType(text)
-    const checkIn = findDateByLabels(text, dates, /(入住|到店|入住日期)/) || dates[0]
-    const checkOut = findDateByLabels(text, dates, /(退房|离店|退房日期)/) || dates.find(item => !checkIn || item.index !== checkIn.index)
+    const checkIn = findDateOnSameLine(text, dates, /(入住|到店|入住日期)/)
+      || dates.find(item => !/(取消|支付|订单|开售|放票|发售)/.test(lineTextAt(text, item.index)))
+      || dates[0]
+    const checkOut = findDateOnSameLine(text, dates, /(退房|离店|退房日期)/)
+      || dates.find(item => (!checkIn || item.index !== checkIn.index) && item.value !== (checkIn && checkIn.value))
     result.date = checkIn ? checkIn.value : result.date
     result.checkOutDate = checkOut ? checkOut.value : ''
   } else if (type === 'flight' || type === 'train') {
@@ -282,6 +373,10 @@ function parseOrderText(rawText) {
     if (hubs[1]) {
       result.locationEnd = hubs[1].name
       result.locationEndCity = hubs[1].city
+    }
+    if (type === 'flight') {
+      result.departureTerminal = findTerminalNearHub(text, hubs[0])
+      result.arrivalTerminal = findTerminalNearHub(text, hubs[1])
     }
     const classValues = type === 'flight' ? FLIGHT_CLASSES : TRAIN_CLASSES
     const detectedClasses = classValues.filter(value => text.includes(value))

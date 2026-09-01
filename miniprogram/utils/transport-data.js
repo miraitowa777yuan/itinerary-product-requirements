@@ -204,8 +204,20 @@ function findKnownHubsInText(text, type) {
     const hubs = type === 'flight' ? CITY_HUBS[city].airports : CITY_HUBS[city].stations
     hubs.forEach(hub => {
       const item = typeof hub === 'string' ? { name: hub, terminals: [] } : hub
-      const candidates = [item.name, item.name.replace(/国际机场$/, ''), item.name.replace(/机场$/, '')]
-      const matched = candidates.find(name => name.length >= 3 && source.includes(normalize(name)))
+      const citylessName = item.name.replace(new RegExp(`^${city}`), '')
+      const candidates = [
+        item.name,
+        item.name.replace(/国际机场$/, ''),
+        item.name.replace(/机场$/, ''),
+        item.name.replace(/国际机场$/, '机场'),
+        citylessName,
+        citylessName.replace(/国际机场$/, '机场'),
+        citylessName.replace(/机场$/, '')
+      ]
+      const matched = candidates.find(name => {
+        const normalizedName = normalize(name)
+        return normalizedName.length >= 3 && !/^(国际机场|国际|机场)$/.test(normalizedName) && source.includes(normalizedName)
+      })
       if (matched) matches.push({ city, name: item.name, terminals: item.terminals || [], position: source.indexOf(normalize(matched)) })
     })
   })
