@@ -55,9 +55,7 @@ Page({
   },
 
   onUnload() {
-    if (this._ocrTimer) clearTimeout(this._ocrTimer)
-    if (this._ocrSession && this._ocrSession.stop) this._ocrSession.stop()
-    this._ocrSession = null
+    this.resetOcrSession()
   },
 
   changeEntryMode(event) {
@@ -173,9 +171,15 @@ Page({
       wx.createSelectorQuery().select('#ocr-canvas').node().exec(result => {
         try {
           const canvas = result[0] && result[0].node
+          const systemInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync()
+          if (canvas) {
+            canvas.width = Math.max(1, Math.round(systemInfo.windowWidth * systemInfo.pixelRatio))
+            canvas.height = Math.max(1, Math.round(systemInfo.windowHeight * 0.8 * systemInfo.pixelRatio))
+          }
           const gl = canvas && canvas.getContext('webgl')
           if (!canvas || !gl) throw new Error('OCR 画布初始化失败')
           const session = wx.createVKSession({ track: { OCR: { mode: 2 } }, version: 'v1', gl })
+          session.on('addAnchors', anchors => this.handleOcrAnchors(anchors))
           session.on('updateAnchors', anchors => this.handleOcrAnchors(anchors))
           session.start(error => {
             if (error) {
@@ -185,6 +189,7 @@ Page({
             }
             this._ocrSession = session
             this._ocrCanvas = canvas
+            this.startOcrFrameLoop(session, canvas)
             resolve(session)
           })
         } catch (error) {
@@ -196,18 +201,55 @@ Page({
     return this._ocrPreparing
   },
 
+  startOcrFrameLoop(session, canvas) {
+    const onFrame = () => {
+      if (this._ocrSession !== session) return
+      try {
+        session.getVKFrame(canvas.width, canvas.height)
+      } catch (error) {
+        return
+      }
+      session.requestAnimationFrame(onFrame)
+    }
+    session.requestAnimationFrame(onFrame)
+  },
+
+  resetOcrSession() {
+    if (this._ocrTimer) clearTimeout(this._ocrTimer)
+    if (this._ocrResultTimer) clearTimeout(this._ocrResultTimer)
+    if (this._ocrSession && this._ocrSession.stop) this._ocrSession.stop()
+    this._ocrTimer = null
+    this._ocrResultTimer = null
+    this._ocrSession = null
+    this._ocrPreparing = null
+    this._ocrCanvas = null
+    this._ocrResolve = null
+    this._ocrReject = null
+    this._ocrChunks = []
+  },
+
   handleOcrAnchors(anchors) {
     if (!this._ocrResolve || !Array.isArray(anchors) || !anchors.length) return
-    const chunks = []
+    if (!Array.isArray(this._ocrChunks)) this._ocrChunks = []
     anchors.forEach(anchor => {
-      if (anchor.text && !chunks.includes(anchor.text)) chunks.push(anchor.text)
-      if (!anchor.text && anchor.subtext && !chunks.includes(anchor.subtext)) chunks.push(anchor.subtext)
+      const chunk = String(anchor.text || anchor.subtext || '').trim()
+      if (chunk && !this._ocrChunks.includes(chunk)) this._ocrChunks.push(chunk)
     })
-    const text = chunks.join('\n').trim()
-    if (!text) return
+    if (!this._ocrChunks.length) return
+    if (this._ocrResultTimer) clearTimeout(this._ocrResultTimer)
+    this._ocrResultTimer = setTimeout(() => this.completeOcrRecognition(), 700)
+  },
+
+  completeOcrRecognition() {
+    if (!this._ocrResolve || !this._ocrChunks || !this._ocrChunks.length) return
+    const text = this._ocrChunks.join('\n').trim()
     clearTimeout(this._ocrTimer)
     const resolve = this._ocrResolve
     this._ocrResolve = null
+    this._ocrReject = null
+    this._ocrTimer = null
+    this._ocrResultTimer = null
+    this._ocrChunks = []
     resolve(text)
   },
 
@@ -220,8 +262,11 @@ Page({
       const imageInfo = await new Promise((resolve, reject) => {
         wx.getImageInfo({ src: this.data.screenshotPath, success: resolve, fail: reject })
       })
-      const maxSide = 1600
-      const scale = Math.min(1, maxSide / Math.max(imageInfo.width, imageInfo.height))
+      const maxWidth = 1440
+      const maxHeight = 3600
+      const maxPixels = 3500000
+      const pixelScale = Math.sqrt(maxPixels / (imageInfo.width * imageInfo.height))
+      const scale = Math.min(1, maxWidth / imageInfo.width, maxHeight / imageInfo.height, pixelScale)
       const width = Math.max(1, Math.round(imageInfo.width * scale))
       const height = Math.max(1, Math.round(imageInfo.height * scale))
       const canvas = wx.createOffscreenCanvas({ type: '2d', width, height })
@@ -232,15 +277,29 @@ Page({
         image.onerror = reject
         image.src = this.data.screenshotPath
       })
+      context.clearRect(0, 0, width, height)
       context.drawImage(image, 0, 0, width, height)
       const imageData = context.getImageData(0, 0, width, height)
       const recognizedText = await new Promise((resolve, reject) => {
         this._ocrResolve = resolve
-        this._ocrTimer = setTimeout(() => {
+        this._ocrReject = reject
+        this._ocrChunks = []
+        const failRecognition = error => {
+          if (!this._ocrReject) return
+          const rejectRequest = this._ocrReject
           this._ocrResolve = null
-          reject(new Error('识别超时，请换一张更清晰的截图'))
-        }, 15000)
-        session.runOCR({ frameBuffer: imageData.data.buffer, width, height })
+          this._ocrReject = null
+          this.resetOcrSession()
+          rejectRequest(error)
+        }
+        this._ocrTimer = setTimeout(() => {
+          failRecognition(new Error('识别暂未返回结果，请重试或切换手动录入'))
+        }, 30000)
+        try {
+          session.runOCR({ frameBuffer: imageData.data.buffer, width, height })
+        } catch (error) {
+          failRecognition(error)
+        }
       })
       this.applyRecognizedText(recognizedText)
     } catch (error) {
