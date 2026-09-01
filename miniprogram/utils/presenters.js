@@ -11,7 +11,16 @@ const TYPE_LABELS = {
   custom: '自定义'
 }
 
-function tripStatusLabel(status) {
+function isPastTrip(trip) {
+  if (!trip || !trip.endDate) return false
+  const now = new Date()
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  return trip.endDate < today
+}
+
+function tripStatusLabel(status, trip) {
+  if (trip && trip.archived) return '已归档'
+  if (status === 'completed' || isPastTrip(trip)) return '已结束'
   return {
     upcoming: '即将出发',
     active: '旅途中',
@@ -29,8 +38,10 @@ function bookingStatusLabel(item) {
 
 function presentTrip(trip) {
   return Object.assign({}, trip, {
-    statusLabel: tripStatusLabel(trip.status),
-    itemCount: Array.isArray(trip.items) ? trip.items.length : 0
+    statusLabel: tripStatusLabel(trip.status, trip),
+    itemCount: Array.isArray(trip.items) ? trip.items.length : 0,
+    isArchived: Boolean(trip.archived),
+    isPast: isPastTrip(trip)
   })
 }
 

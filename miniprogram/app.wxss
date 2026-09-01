@@ -13,7 +13,7 @@ button {
 .page-shell {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 32rpx;
+  padding: 32rpx 32rpx 132rpx;
 }
 
 .eyebrow {

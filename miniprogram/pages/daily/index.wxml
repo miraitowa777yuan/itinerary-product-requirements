@@ -1,0 +1,48 @@
+<view class="page-shell daily-page">
+  <view class="hero">
+    <text class="eyebrow">EVERYDAY PLANS</text>
+    <view class="hero-row">
+      <view>
+        <view class="page-title">日常行程</view>
+        <view class="muted">不用创建旅行，也能记录周边城市的一天。</view>
+      </view>
+      <view class="create-button" role="button" aria-label="添加日常行程" bindtap="addItem" hover-class="create-button--pressed">
+        <text class="create-icon">＋</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{items.length}}" class="daily-list">
+    <view wx:for="{{items}}" wx:key="id" class="daily-row">
+      <view class="daily-time">
+        <view class="daily-date">{{item.date}}</view>
+        <view class="daily-time-label">{{item.timeLabel}}</view>
+      </view>
+      <view class="daily-card" data-id="{{item.id}}" bindtap="editItem">
+        <view class="item-topline">
+          <text class="item-type">{{item.typeLabel}}</text>
+          <text class="status-pill {{item.isWaitingToBook ? 'status-pill--waiting' : ''}}">{{item.bookingStatusLabel}}</text>
+        </view>
+        <view class="item-title">{{item.title}}</view>
+        <view wx:if="{{item.locationStart && item.hasRoute}}" class="item-route">{{item.locationStart}} → {{item.locationEnd}}</view>
+        <view wx:elif="{{item.locationStart}}" class="item-route">{{item.locationStart}}</view>
+        <view wx:if="{{item.airlineName}}" class="item-detail item-airline">{{item.airlineName}}</view>
+        <view wx:if="{{item.transportNo}}" class="item-detail">{{item.transportNo}}</view>
+        <view wx:if="{{item.terminalLabel}}" class="item-detail">{{item.terminalLabel}}</view>
+        <view wx:if="{{item.travelClassLabel}}" class="item-detail">舱位 / 席别：{{item.travelClassLabel}}</view>
+        <view wx:if="{{item.hotelMetaLabel}}" class="item-detail">{{item.hotelMetaLabel}}</view>
+        <view wx:if="{{item.isWaitingToBook}}" class="booking-box">
+          <view>预计开售：{{item.expectedSaleAt || '尚未填写'}}</view>
+          <view wx:if="{{item.preferredSeatClass}}">期望席别：{{item.preferredSeatClass}}</view>
+          <button class="ticketed-button" catchtap="markTicketed" data-id="{{item.id}}">标记已出票</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty-state">
+    <view class="empty-title">今天还没有安排</view>
+    <view class="muted">把附近城市的酒店、车票、聚餐或活动放在这里。</view>
+    <button class="primary-button empty-action" bindtap="addItem">添加第一项</button>
+  </view>
+</view>

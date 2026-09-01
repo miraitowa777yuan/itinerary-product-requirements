@@ -1,6 +1,9 @@
 {
   "pages": [
     "pages/trips/index",
+    "pages/daily/index",
+    "pages/archive/index",
+    "pages/profile/index",
     "pages/trip/detail",
     "pages/trip/edit",
     "pages/item/edit"
@@ -11,6 +14,30 @@
     "navigationBarTitleText": "行程计划器",
     "backgroundColor": "#F6F5F1",
     "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#8A938D",
+    "selectedColor": "#17483C",
+    "backgroundColor": "#FCFBF8",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/daily/index",
+        "text": "日常行程"
+      },
+      {
+        "pagePath": "pages/trips/index",
+        "text": "旅行行程"
+      },
+      {
+        "pagePath": "pages/archive/index",
+        "text": "过往旅行"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "个人"
+      }
+    ]
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"

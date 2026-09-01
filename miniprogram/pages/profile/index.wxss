@@ -1,0 +1,89 @@
+.profile-page {
+  padding-bottom: 132rpx;
+}
+
+.hero {
+  padding: 36rpx 4rpx 28rpx;
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  border-radius: 28rpx;
+  background: #fff;
+  box-shadow: 0 12rpx 36rpx rgba(32, 37, 34, 0.06);
+}
+
+.avatar {
+  display: flex;
+  width: 88rpx;
+  height: 88rpx;
+  align-items: center;
+  justify-content: center;
+  border-radius: 28rpx;
+  color: #fff;
+  background: #1d4f42;
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.identity-copy {
+  margin-left: 22rpx;
+}
+
+.identity-name {
+  margin-bottom: 8rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.profile-section-title {
+  margin: 42rpx 4rpx 18rpx;
+  color: #5a635e;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.settings-card {
+  padding: 0 28rpx;
+  border-radius: 28rpx;
+  background: #fff;
+  box-shadow: 0 12rpx 36rpx rgba(32, 37, 34, 0.06);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 112rpx;
+  border-bottom: 2rpx solid #f0f1ee;
+}
+
+.setting-row:last-child {
+  border-bottom: 0;
+}
+
+.setting-title {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.setting-help {
+  margin-top: 6rpx;
+  color: #8a928d;
+  font-size: 21rpx;
+}
+
+.setting-status {
+  color: #8b5115;
+  font-size: 21rpx;
+}
+
+.profile-note {
+  margin: 28rpx 8rpx 0;
+  color: #8a928d;
+  font-size: 22rpx;
+  line-height: 1.6;
+  text-align: center;
+}

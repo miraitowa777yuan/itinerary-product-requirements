@@ -1,0 +1,42 @@
+<view class="page-shell profile-page">
+  <view class="hero">
+    <text class="eyebrow">PERSONAL SPACE</text>
+    <view class="page-title">个人</view>
+    <view class="muted">把偏好和常用信息留在自己的行程空间里。</view>
+  </view>
+
+  <view class="profile-card profile-card--identity">
+    <view class="avatar">旅</view>
+    <view class="identity-copy">
+      <view class="identity-name">{{profile.name}}</view>
+      <view class="muted">{{profile.description}}</view>
+    </view>
+  </view>
+
+  <view class="profile-section-title">个人设置</view>
+  <view class="settings-card">
+    <view class="setting-row">
+      <view>
+        <view class="setting-title">常用出发地</view>
+        <view class="setting-help">保存后可用于快速填写交通安排</view>
+      </view>
+      <text class="setting-status">待完善</text>
+    </view>
+    <view class="setting-row">
+      <view>
+        <view class="setting-title">出行偏好</view>
+        <view class="setting-help">舱位、席别和提醒方式</view>
+      </view>
+      <text class="setting-status">待完善</text>
+    </view>
+    <view class="setting-row">
+      <view>
+        <view class="setting-title">数据与隐私</view>
+        <view class="setting-help">管理本机行程数据与分享范围</view>
+      </view>
+      <text class="setting-status">待完善</text>
+    </view>
+  </view>
+
+  <view class="profile-note">当前版本数据保存在本机，后续可接入账号同步与跨设备访问。</view>
+</view>

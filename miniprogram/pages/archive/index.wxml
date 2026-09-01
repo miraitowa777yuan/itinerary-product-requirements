@@ -1,0 +1,34 @@
+<view class="page-shell archive-page">
+  <view class="hero">
+    <text class="eyebrow">PAST JOURNEYS</text>
+    <view class="page-title">过往旅行</view>
+    <view class="muted">已结束或手动归档的旅行会集中在这里。</view>
+  </view>
+
+  <view wx:if="{{trips.length}}" class="trip-list">
+    <view
+      wx:for="{{trips}}"
+      wx:key="id"
+      class="trip-card"
+      data-id="{{item.id}}"
+      bindtap="openTrip"
+    >
+      <view class="trip-card__top">
+        <text class="trip-status trip-status--past">{{item.isArchived ? '已归档' : '已结束'}}</text>
+        <text class="trip-count">{{item.itemCount}} 项安排</text>
+      </view>
+      <view class="trip-title">{{item.title}}</view>
+      <view class="trip-destination">{{item.destination}}</view>
+      <view class="trip-date">{{item.startDate}} — {{item.endDate}}</view>
+      <view class="trip-actions">
+        <view wx:if="{{item.isArchived && !item.isPast}}" class="trip-action trip-action--restore" role="button" data-id="{{item.id}}" catchtap="restoreTrip">移回旅行行程</view>
+        <view class="trip-action trip-action--delete" role="button" data-id="{{item.id}}" catchtap="confirmDeleteTrip">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty-state">
+    <view class="empty-title">还没有过往旅行</view>
+    <view class="muted">旅行结束后，或在旅行行程中点击“归档”，这里就会留下记录。</view>
+  </view>
+</view>

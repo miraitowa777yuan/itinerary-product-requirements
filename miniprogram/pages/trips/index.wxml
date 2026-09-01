@@ -1,9 +1,9 @@
 <view class="page-shell">
   <view class="hero">
-    <text class="eyebrow">YOUR JOURNEYS</text>
+    <text class="eyebrow">TRAVEL JOURNEYS</text>
     <view class="hero-row">
       <view>
-        <view class="page-title">我的旅行</view>
+        <view class="page-title">旅行行程</view>
         <view class="muted">从计划到出发，都在同一处继续。</view>
       </view>
       <view class="create-button" role="button" aria-label="创建旅行" bindtap="createTrip" hover-class="create-button--pressed">
@@ -27,11 +27,15 @@
       <view class="trip-title">{{item.title}}</view>
       <view class="trip-destination">{{item.destination}}</view>
       <view class="trip-date">{{item.startDate}} — {{item.endDate}}</view>
+      <view class="trip-actions">
+        <view class="trip-action trip-action--archive" role="button" data-id="{{item.id}}" catchtap="archiveTrip">归档</view>
+        <view class="trip-action trip-action--delete" role="button" data-id="{{item.id}}" catchtap="confirmDeleteTrip">删除</view>
+      </view>
     </view>
   </view>
 
   <view wx:else class="empty-state">
-    <view class="empty-title">还没有旅行</view>
+    <view class="empty-title">还没有进行中的旅行</view>
     <view class="muted">创建第一段旅程，把交通、酒店和活动放在一起。</view>
     <button class="primary-button empty-action" bindtap="createTrip">创建旅行</button>
   </view>

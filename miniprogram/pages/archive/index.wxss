@@ -1,37 +1,9 @@
+.archive-page {
+  padding-bottom: 132rpx;
+}
+
 .hero {
   padding: 36rpx 4rpx 28rpx;
-}
-
-.hero-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-}
-
-.create-button {
-  display: flex;
-  width: 72rpx;
-  min-width: 0;
-  height: 64rpx;
-  box-sizing: border-box;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  padding: 0;
-  border-radius: 18rpx;
-  color: #fff;
-  background: #1d4f42;
-  font-size: 38rpx;
-  line-height: 1;
-}
-
-.create-button--pressed {
-  opacity: 0.82;
-}
-
-.create-icon {
-  line-height: 1;
 }
 
 .trip-list {
@@ -54,9 +26,8 @@
   font-size: 22rpx;
 }
 
-.trip-status {
-  color: #1d4f42;
-  font-weight: 700;
+.trip-status--past {
+  color: #6f7772;
 }
 
 .trip-title {
@@ -95,7 +66,7 @@
   font-weight: 700;
 }
 
-.trip-action--archive {
+.trip-action--restore {
   color: #1d4f42;
   background: #e2ebe6;
 }
@@ -117,8 +88,4 @@
   margin-bottom: 12rpx;
   font-size: 36rpx;
   font-weight: 700;
-}
-
-.empty-action {
-  margin-top: 34rpx;
 }

@@ -1,0 +1,153 @@
+.daily-page {
+  padding-bottom: 132rpx;
+}
+
+.hero {
+  padding: 36rpx 4rpx 28rpx;
+}
+
+.hero-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.create-button {
+  display: flex;
+  width: 64rpx;
+  height: 58rpx;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border-radius: 16rpx;
+  color: #fff;
+  background: #1d4f42;
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+.create-button--pressed {
+  opacity: 0.82;
+}
+
+.daily-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.daily-row {
+  display: grid;
+  grid-template-columns: 128rpx 1fr;
+  gap: 16rpx;
+  align-items: start;
+}
+
+.daily-time {
+  padding-top: 24rpx;
+  text-align: right;
+}
+
+.daily-date {
+  color: #7a827d;
+  font-size: 20rpx;
+}
+
+.daily-time-label {
+  margin-top: 8rpx;
+  color: #27312c;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
+.daily-card {
+  padding: 28rpx;
+  border-radius: 26rpx;
+  background: #fff;
+  box-shadow: 0 10rpx 34rpx rgba(32, 37, 34, 0.05);
+}
+
+.item-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.item-type {
+  color: #68716c;
+  font-size: 22rpx;
+}
+
+.status-pill {
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+  color: #1d4f42;
+  background: #e4eee9;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.status-pill--waiting {
+  color: #955613;
+  background: #fff0d7;
+}
+
+.item-title {
+  margin-top: 20rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.item-route,
+.item-detail {
+  margin-top: 10rpx;
+  color: #67706b;
+  font-size: 24rpx;
+}
+
+.item-airline {
+  color: #1d4f42;
+  font-weight: 700;
+}
+
+.booking-box {
+  margin-top: 24rpx;
+  padding: 20rpx;
+  border-radius: 18rpx;
+  color: #7b4c19;
+  background: #fff8eb;
+  font-size: 22rpx;
+  line-height: 1.8;
+}
+
+.ticketed-button {
+  margin: 18rpx 0 0;
+  color: #7b4c19;
+  background: #f6dfbb;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.ticketed-button::after {
+  border: 0;
+}
+
+.empty-state {
+  margin-top: 100rpx;
+  padding: 54rpx 40rpx;
+  border-radius: 32rpx;
+  text-align: center;
+  background: #fff;
+}
+
+.empty-title {
+  margin-bottom: 12rpx;
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.empty-action {
+  margin-top: 34rpx;
+}

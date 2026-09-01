@@ -25,6 +25,9 @@
 | startDate / endDate | 旅行日期范围 |
 | defaultTimezone | 默认时区 |
 | status | upcoming / active / completed / archived |
+| archived | 是否由用户手动归档 |
+| archivedAt | 手动归档时间，可为空 |
+| isDaily | 是否为不出现在旅行列表中的“日常行程”容器 |
 | coverAssetId | 可选封面资源 |
 | note | 旅行级备注 |
 | version | 并发控制版本 |

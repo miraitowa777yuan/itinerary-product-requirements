@@ -11,28 +11,29 @@ Page({
   },
 
   loadTrips() {
-    this.setData({
-      trips: tripStore.getTrips({
-        includeArchived: false,
-        includeDaily: false,
-        includePast: false
-      }).map(presentTrip)
-    })
+    const trips = tripStore.getTrips({
+      includeArchived: true,
+      includeDaily: false,
+      includePast: true
+    }).filter(trip => trip.archived || tripStore.isPastTrip(trip))
+      .sort((left, right) => {
+        const leftKey = left.endDate || left.archivedAt || ''
+        const rightKey = right.endDate || right.archivedAt || ''
+        return String(rightKey).localeCompare(String(leftKey))
+      })
+      .map(presentTrip)
+    this.setData({ trips })
   },
 
   openTrip(event) {
     wx.navigateTo({ url: `/pages/trip/detail?id=${event.currentTarget.dataset.id}` })
   },
 
-  createTrip() {
-    wx.navigateTo({ url: '/pages/trip/edit' })
-  },
-
-  archiveTrip(event) {
+  restoreTrip(event) {
     const tripId = event.currentTarget.dataset.id
-    if (!tripId || !tripStore.archiveTrip(tripId)) return
+    if (!tripId || !tripStore.restoreTrip(tripId)) return
     this.loadTrips()
-    wx.showToast({ title: '已移入过往旅行', icon: 'none' })
+    wx.showToast({ title: '已移回旅行行程', icon: 'none' })
   },
 
   confirmDeleteTrip(event) {

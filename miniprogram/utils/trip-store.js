@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'itinerary_trips_v1'
+const DAILY_TRIP_ID = 'trip_daily_local'
 
 const seedTrips = [
   {
@@ -58,6 +59,31 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value))
 }
 
+function normalizeTrip(trip) {
+  const normalized = Object.assign({
+    status: 'upcoming',
+    items: [],
+    archived: false,
+    isDaily: false
+  }, trip || {})
+  normalized.items = Array.isArray(normalized.items) ? normalized.items : []
+  normalized.archived = Boolean(normalized.archived)
+  normalized.isDaily = Boolean(normalized.isDaily || normalized.id === DAILY_TRIP_ID)
+  return normalized
+}
+
+function getTodayKey() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function isPastTrip(trip) {
+  return Boolean(trip && trip.endDate && trip.endDate < getTodayKey())
+}
+
 function ensureSeedData() {
   const current = wx.getStorageSync(STORAGE_KEY)
   if (!Array.isArray(current)) {
@@ -65,9 +91,22 @@ function ensureSeedData() {
   }
 }
 
-function getTrips() {
+function readTrips() {
   ensureSeedData()
-  return clone(wx.getStorageSync(STORAGE_KEY) || [])
+  return (wx.getStorageSync(STORAGE_KEY) || []).map(normalizeTrip)
+}
+
+function getTrips(options) {
+  const settings = Object.assign({
+    includeArchived: true,
+    includeDaily: false,
+    includePast: true
+  }, options || {})
+  return readTrips()
+    .filter(trip => settings.includeDaily || !trip.isDaily)
+    .filter(trip => settings.includeArchived || !trip.archived)
+    .filter(trip => settings.includePast || !isPastTrip(trip))
+    .map(clone)
 }
 
 function saveTrips(trips) {
@@ -75,7 +114,7 @@ function saveTrips(trips) {
 }
 
 function getTrip(tripId) {
-  return getTrips().find((trip) => trip.id === tripId) || null
+  return readTrips().find((trip) => trip.id === tripId) || null
 }
 
 function makeId(prefix) {
@@ -83,15 +122,21 @@ function makeId(prefix) {
 }
 
 function saveTrip(input) {
-  const trips = getTrips()
+  const trips = readTrips()
   const trip = Object.assign({
     id: makeId('trip'),
     status: 'upcoming',
-    items: []
+    items: [],
+    archived: false,
+    isDaily: false
   }, input)
+  trip.isDaily = false
+  trip.archived = Boolean(trip.archived)
   const index = trips.findIndex((item) => item.id === trip.id)
   if (index >= 0) {
-    trip.items = Array.isArray(input.items) ? input.items : trips[index].items
+    trip.items = Array.isArray(input && input.items) ? input.items : trips[index].items
+    trip.archived = typeof (input && input.archived) === 'boolean' ? input.archived : trips[index].archived
+    trip.isDaily = trips[index].isDaily
     trips[index] = trip
   } else {
     trips.unshift(trip)
@@ -101,7 +146,7 @@ function saveTrip(input) {
 }
 
 function saveItem(tripId, input) {
-  const trips = getTrips()
+  const trips = readTrips()
   const tripIndex = trips.findIndex((trip) => trip.id === tripId)
   if (tripIndex < 0) return null
 
@@ -119,7 +164,7 @@ function saveItem(tripId, input) {
 }
 
 function updateBookingStatus(tripId, itemId, bookingStatus) {
-  const trips = getTrips()
+  const trips = readTrips()
   const trip = trips.find((current) => current.id === tripId)
   if (!trip) return false
   const item = trip.items.find((current) => current.id === itemId)
@@ -130,7 +175,7 @@ function updateBookingStatus(tripId, itemId, bookingStatus) {
 }
 
 function deleteItem(tripId, itemId) {
-  const trips = getTrips()
+  const trips = readTrips()
   const trip = trips.find((current) => current.id === tripId)
   if (!trip) return false
   trip.items = trip.items.filter((item) => item.id !== itemId)
@@ -138,12 +183,73 @@ function deleteItem(tripId, itemId) {
   return true
 }
 
+function ensureDailyTrip() {
+  const trips = readTrips()
+  const existing = trips.find(trip => trip.id === DAILY_TRIP_ID)
+  if (existing) return clone(existing)
+  const dailyTrip = {
+    id: DAILY_TRIP_ID,
+    title: '日常行程',
+    destination: '周边城市',
+    startDate: '',
+    endDate: '',
+    status: 'active',
+    archived: false,
+    isDaily: true,
+    items: []
+  }
+  trips.push(dailyTrip)
+  saveTrips(trips)
+  return clone(dailyTrip)
+}
+
+function archiveTrip(tripId) {
+  const trips = readTrips()
+  const trip = trips.find(current => current.id === tripId)
+  if (!trip || trip.isDaily) return false
+  if (!trip.archived) trip.statusBeforeArchive = trip.status || 'upcoming'
+  trip.archived = true
+  trip.status = 'archived'
+  trip.archivedAt = new Date().toISOString()
+  saveTrips(trips)
+  return true
+}
+
+function restoreTrip(tripId) {
+  const trips = readTrips()
+  const trip = trips.find(current => current.id === tripId)
+  if (!trip || trip.isDaily) return false
+  trip.archived = false
+  trip.status = trip.statusBeforeArchive || (isPastTrip(trip) ? 'completed' : 'upcoming')
+  delete trip.archivedAt
+  delete trip.statusBeforeArchive
+  saveTrips(trips)
+  return true
+}
+
+function deleteTrip(tripId) {
+  const trips = readTrips()
+  const nextTrips = trips.filter(trip => trip.id !== tripId || trip.isDaily)
+  if (nextTrips.length === trips.length) return false
+  saveTrips(nextTrips)
+  return true
+}
+
+const removeTrip = deleteTrip
+
 module.exports = {
+  DAILY_TRIP_ID,
   ensureSeedData,
+  ensureDailyTrip,
   getTrips,
   getTrip,
   saveTrip,
   saveItem,
   updateBookingStatus,
-  deleteItem
+  deleteItem,
+  archiveTrip,
+  restoreTrip,
+  deleteTrip,
+  removeTrip,
+  isPastTrip
 }
