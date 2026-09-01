@@ -9,19 +9,29 @@
 }
 
 .create-button {
-  width: 92rpx;
-  height: 92rpx;
+  display: flex;
+  width: 84rpx;
+  min-width: 0;
+  height: 64rpx;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   margin: 0;
   padding: 0;
-  border-radius: 50%;
+  border-radius: 18rpx;
   color: #fff;
   background: #1d4f42;
-  font-size: 48rpx;
-  line-height: 88rpx;
+  font-size: 38rpx;
+  line-height: 1;
 }
 
-.create-button::after {
-  border: 0;
+.create-button--pressed {
+  opacity: 0.82;
+}
+
+.create-icon {
+  line-height: 1;
 }
 
 .trip-list {
@@ -80,7 +90,6 @@
   font-weight: 700;
 }
 
-.empty-state button {
+.empty-action {
   margin-top: 34rpx;
 }
-

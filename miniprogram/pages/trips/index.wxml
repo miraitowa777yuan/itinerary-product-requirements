@@ -6,7 +6,9 @@
         <view class="page-title">我的旅行</view>
         <view class="muted">从计划到出发，都在同一处继续。</view>
       </view>
-      <button class="create-button" bindtap="createTrip" aria-label="创建旅行">＋</button>
+      <view class="create-button" role="button" aria-label="创建旅行" bindtap="createTrip" hover-class="create-button--pressed">
+        <text class="create-icon">＋</text>
+      </view>
     </view>
   </view>
 
@@ -31,7 +33,6 @@
   <view wx:else class="empty-state">
     <view class="empty-title">还没有旅行</view>
     <view class="muted">创建第一段旅程，把交通、酒店和活动放在一起。</view>
-    <button class="primary-button" bindtap="createTrip">创建旅行</button>
+    <button class="primary-button empty-action" bindtap="createTrip">创建旅行</button>
   </view>
 </view>
-
