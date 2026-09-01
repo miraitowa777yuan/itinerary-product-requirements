@@ -1,4 +1,4 @@
-const { findKnownHubsInText } = require('./transport-data')
+const { CITY_HUBS, findKnownHubsInText } = require('./transport-data')
 
 const FLIGHT_CLASSES = ['头等舱', '公务舱', '经济舱']
 const TRAIN_CLASSES = ['商务座', '特等座', '一等座', '二等座', '站票']
@@ -16,22 +16,144 @@ function pad(value) {
 }
 
 function parseDate(text) {
-  let match = text.match(/(20\d{2})[年\/.\-](\d{1,2})[月\/.\-](\d{1,2})日?/)
-  if (match) return `${match[1]}-${pad(match[2])}-${pad(match[3])}`
-  match = text.match(/(\d{1,2})月(\d{1,2})日/)
-  if (match) return `${new Date().getFullYear()}-${pad(match[1])}-${pad(match[2])}`
-  return ''
+  const dates = extractDates(text)
+  return dates[0] ? dates[0].value : ''
 }
 
-function parseTimes(text) {
+function extractDates(text) {
+  const source = String(text || '')
+  const explicitYear = source.match(/(20\d{2})[年\/.\-]/)
+  const defaultYear = explicitYear ? Number(explicitYear[1]) : new Date().getFullYear()
+  const dates = []
+  const pattern = /(?:(20\d{2})[年\/.\-])?(\d{1,2})[月\/.\-](\d{1,2})日?/g
+  let match
+  while ((match = pattern.exec(source))) {
+    const month = Number(match[2])
+    const day = Number(match[3])
+    if (month < 1 || month > 12 || day < 1 || day > 31) continue
+    dates.push({
+      value: `${match[1] || defaultYear}-${pad(month)}-${pad(day)}`,
+      index: match.index,
+      raw: match[0]
+    })
+  }
+  return dates
+}
+
+function extractTimes(text) {
   const values = []
   const pattern = /(?:^|[^\d])([01]?\d|2[0-3])[:：]([0-5]\d)(?!\d)/g
   let match
-  while ((match = pattern.exec(text)) && values.length < 2) {
+  while ((match = pattern.exec(text))) {
     const value = `${pad(match[1])}:${match[2]}`
-    if (!values.includes(value)) values.push(value)
+    const index = match.index + match[0].indexOf(match[1])
+    if (!values.some(item => item.value === value && Math.abs(item.index - index) < 3)) {
+      values.push({ value, index })
+    }
   }
   return values
+}
+
+function nearbyText(text, index, radius) {
+  return text.slice(Math.max(0, index - radius), Math.min(text.length, index + radius))
+}
+
+function lineTextAt(text, index) {
+  const lineStart = text.lastIndexOf('\n', index) + 1
+  const nextLine = text.indexOf('\n', index)
+  return text.slice(lineStart, nextLine >= 0 ? nextLine : text.length)
+}
+
+function findHubPosition(text, hub) {
+  if (!hub) return -1
+  const names = [
+    hub.name,
+    hub.name.replace(/国际机场$/, ''),
+    hub.name.replace(/机场$/, ''),
+    hub.city
+  ]
+  const positions = names.map(name => text.indexOf(name)).filter(index => index >= 0)
+  return positions.length ? Math.min(...positions) : -1
+}
+
+function scoreTravelTime(text, candidate, role, hub) {
+  const context = nearbyText(text, candidate.index, 42)
+  const line = lineTextAt(text, candidate.index)
+  const startLabels = /(起飞|出发|计划起飞|预计起飞|始发)/
+  const endLabels = /(到达|抵达|计划到达|预计到达|终到)/
+  const metadata = /(下单|预订|支付|出票|更新时间|提交|创建|取消|客服)/
+  let score = 0
+  if ((role === 'start' ? startLabels : endLabels).test(context)) score += 120
+  if ((role === 'start' ? endLabels : startLabels).test(context)) score -= 35
+  if (metadata.test(line)) score -= 140
+  if (candidate.index < 18) score -= 90
+  const hubPosition = findHubPosition(text, hub)
+  if (hubPosition >= 0) {
+    const distance = Math.abs(candidate.index - hubPosition)
+    score += Math.max(0, 100 - distance)
+  }
+  return score
+}
+
+function parseTravelTimes(text, hubs) {
+  const candidates = extractTimes(text)
+  if (!candidates.length) return []
+  const choose = (role, excludedIndex) => candidates
+    .map((candidate, index) => ({ candidate, index, score: scoreTravelTime(text, candidate, role, hubs[role === 'start' ? 0 : 1]) }))
+    .filter(item => item.index !== excludedIndex)
+    .sort((a, b) => b.score - a.score || a.candidate.index - b.candidate.index)[0]
+  const start = choose('start', -1)
+  const end = choose('end', start ? start.index : -1)
+  const useful = candidates.filter(candidate => {
+    const context = nearbyText(text, candidate.index, 28)
+    if (/(下单|预订|支付|出票|更新|创建|客服)/.test(lineTextAt(text, candidate.index))) return false
+    if (candidate.index < 18 && !/(航班|列车|起飞|出发|到达|机场|车站)/.test(context)) return false
+    return true
+  })
+  const labelledStart = start && start.score >= 110 ? start.candidate : null
+  const labelledEnd = end && end.score >= 110 ? end.candidate : null
+  const startValue = labelledStart ? labelledStart.value : (useful[0] && useful[0].value)
+  const endFallback = useful.find(item => item.value !== startValue)
+  const endValue = labelledEnd && labelledEnd.value !== startValue ? labelledEnd.value : (endFallback && endFallback.value)
+  return [startValue || '', endValue || '']
+}
+
+function findDateByLabels(text, dates, labels) {
+  const sameLineMatches = dates.map(date => {
+    const lineStart = text.lastIndexOf('\n', date.index) + 1
+    const nextLine = text.indexOf('\n', date.index)
+    const lineEnd = nextLine >= 0 ? nextLine : text.length
+    const line = text.slice(lineStart, lineEnd)
+    const linePattern = new RegExp(labels.source, 'g')
+    const distances = []
+    let lineMatch
+    while ((lineMatch = linePattern.exec(line))) {
+      distances.push(Math.abs(lineStart + lineMatch.index - date.index))
+    }
+    return { date, distance: distances.length ? Math.min(...distances) : Infinity }
+  }).filter(item => Number.isFinite(item.distance))
+  if (sameLineMatches.length) {
+    return sameLineMatches.sort((a, b) => a.distance - b.distance || a.date.index - b.date.index)[0].date
+  }
+  const labelPattern = new RegExp(labels.source, 'g')
+  const labelPositions = []
+  let match
+  while ((match = labelPattern.exec(text))) labelPositions.push(match.index)
+  const closest = dates
+    .map(date => ({
+      date,
+      distance: labelPositions.length ? Math.min(...labelPositions.map(index => Math.abs(index - date.index))) : Infinity
+    }))
+    .filter(item => item.distance <= 32)
+    .sort((a, b) => a.distance - b.distance || a.date.index - b.date.index)[0]
+  return closest ? closest.date : undefined
+}
+
+function findTravelDate(text, dates) {
+  const labelled = findDateByLabels(text, dates, /(航班日期|起飞日期|出发日期|乘车日期|行程日期|出行日期|入住)/)
+  if (labelled) return labelled.value
+  const nonMetadata = dates.find(date => !/(下单|预订|支付|出票|创建|取消)/.test(nearbyText(text, date.index, 30)))
+  return (nonMetadata || dates[0] || {}).value || ''
 }
 
 function detectType(text) {
@@ -73,11 +195,25 @@ function findRoomType(text) {
   return match ? match[1].replace(/^(房型|客房)[：:\s]*/, '').trim() : ''
 }
 
+function findHotelCity(text, hotelName) {
+  const labelled = captureLabelValue(text, ['酒店城市', '所在城市', '入住城市', '目的地', '城市'])
+  const labelledCity = labelled.match(/^([\u4e00-\u9fa5]{2,8}?)(?:市|地区|自治州|$|[ ,，])/)
+  if (labelledCity) return labelledCity[1].replace(/省$/, '')
+  const address = captureLabelValue(text, ['酒店地址', '地址', '位置'])
+  const addressCity = address.match(/(?:[\u4e00-\u9fa5]{2,8}(?:省|自治区))?([\u4e00-\u9fa5]{2,6})市/)
+  if (addressCity) return addressCity[1]
+  const cityWithSuffix = text.match(/(?:[\u4e00-\u9fa5]{2,8}(?:省|自治区))?([\u4e00-\u9fa5]{2,6})市(?:[\u4e00-\u9fa5]{0,8}(?:区|县|镇|街|路|道|号))?/)
+  if (cityWithSuffix) return cityWithSuffix[1]
+  return Object.keys(CITY_HUBS).find(city => String(hotelName || '').includes(city) || text.includes(city)) || ''
+}
+
 function parseOrderText(rawText) {
   const text = normalizeText(rawText)
   const type = detectType(text)
-  const times = parseTimes(text)
-  const date = parseDate(text)
+  const dates = extractDates(text)
+  const hubs = type === 'flight' || type === 'train' ? findKnownHubsInText(text, type) : []
+  const times = type === 'flight' || type === 'train' ? parseTravelTimes(text, hubs) : extractTimes(text).slice(0, 2).map(item => item.value)
+  const date = findTravelDate(text, dates)
   const result = {
     type,
     date,
@@ -99,12 +235,13 @@ function parseOrderText(rawText) {
 
   if (type === 'hotel') {
     result.title = findHotelName(text)
-    result.city = captureLabelValue(text, ['酒店城市', '城市', '目的地']).replace(/市$/, '')
+    result.city = findHotelCity(text, result.title)
     result.roomType = findRoomType(text)
-    const dates = text.match(/20\d{2}[年\/.\-]\d{1,2}[月\/.\-]\d{1,2}日?/g) || []
-    if (dates[1]) result.checkOutDate = parseDate(dates[1])
+    const checkIn = findDateByLabels(text, dates, /(入住|到店|入住日期)/) || dates[0]
+    const checkOut = findDateByLabels(text, dates, /(退房|离店|退房日期)/) || dates.find(item => !checkIn || item.index !== checkIn.index)
+    result.date = checkIn ? checkIn.value : result.date
+    result.checkOutDate = checkOut ? checkOut.value : ''
   } else if (type === 'flight' || type === 'train') {
-    const hubs = findKnownHubsInText(text, type)
     if (hubs[0]) {
       result.locationStart = hubs[0].name
       result.locationStartCity = hubs[0].city
