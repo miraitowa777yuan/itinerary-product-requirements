@@ -3,8 +3,7 @@
     "pages/trips/index",
     "pages/trip/detail",
     "pages/trip/edit",
-    "pages/item/edit",
-    "pages/import/order"
+    "pages/item/edit"
   ],
   "window": {
     "navigationBarBackgroundColor": "#F6F5F1",

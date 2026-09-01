@@ -31,6 +31,7 @@ Page({
       checkOutDate: '',
       cabinClass: '',
       seatClass: '',
+      driveToNextMinutes: '',
       bookingStatus: 'waiting_to_book',
       expectedSaleAt: '',
       preferredSeatClass: '',
@@ -95,6 +96,14 @@ Page({
       return
     }
     const item = Object.assign({}, form)
+    if (item.driveToNextMinutes !== '') {
+      const minutes = Number(item.driveToNextMinutes)
+      if (!Number.isFinite(minutes) || minutes <= 0 || minutes > 1440) {
+        wx.showToast({ title: '驾车时长请填写 1–1440 分钟', icon: 'none' })
+        return
+      }
+      item.driveToNextMinutes = String(Math.round(minutes))
+    }
     if (this.data.itemId) item.id = this.data.itemId
     tripStore.saveItem(this.data.tripId, item)
     wx.navigateBack()

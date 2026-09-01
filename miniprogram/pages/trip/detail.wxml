@@ -10,14 +10,7 @@
       <view class="section-title">全程安排</view>
       <view class="muted">按当地日期与时间排列</view>
     </view>
-    <view class="heading-actions">
-      <button class="import-item" bindtap="importScreenshot">截图导入</button>
-      <button class="add-item" bindtap="addItem">手动添加</button>
-    </view>
-  </view>
-
-  <view wx:if="{{routeLoading || routeMessage}}" class="route-notice" bindtap="refreshRoutes">
-    {{routeLoading ? '正在计算机场与酒店间的驾车时长…' : routeMessage}}
+    <button class="add-item" bindtap="addItem">手动添加</button>
   </view>
 
   <view wx:if="{{items.length}}" class="timeline">
@@ -46,11 +39,11 @@
           <view wx:if="{{item.preferredSeatClass}}">期望席别：{{item.preferredSeatClass}}</view>
           <button class="ticketed-button" catchtap="markTicketed" data-id="{{item.id}}">标记已出票</button>
         </view>
-        <view wx:if="{{item.routeToNext}}" class="route-card">
+        <view wx:if="{{item.driveToNextMinutes}}" class="route-card">
           <view class="route-icon">↗</view>
           <view>
-            <view class="route-duration">驾车约 {{item.routeToNext.durationMinutes}} 分钟</view>
-            <view class="route-distance">{{item.routeToNext.origin}} → {{item.routeToNext.destination}} · {{item.routeToNext.distanceKm}} km</view>
+            <view class="route-duration">前往下一项 · 驾车约 {{item.driveToNextMinutes}} 分钟</view>
+            <view class="route-distance">手动填写，可点击本项行程修改</view>
           </view>
         </view>
       </view>

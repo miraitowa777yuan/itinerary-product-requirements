@@ -102,6 +102,12 @@
     </block>
 
     <view class="field">
+      <text class="field-label">到下一项行程的驾车时长</text>
+      <input class="field-input" type="number" value="{{form.driveToNextMinutes}}" placeholder="填写分钟数，例如：45" data-field="driveToNextMinutes" bindinput="updateField" />
+      <view class="field-help">从这一项的到达地或地点，驾车前往时间线下一项。</view>
+    </view>
+
+    <view class="field">
       <text class="field-label">备注</text>
       <textarea class="field-textarea" value="{{form.notes}}" placeholder="补充集合、入住或提醒信息" data-field="notes" bindinput="updateField" />
     </view>
