@@ -1,0 +1,37 @@
+<view class="page-shell">
+  <view class="hero">
+    <text class="eyebrow">YOUR JOURNEYS</text>
+    <view class="hero-row">
+      <view>
+        <view class="page-title">我的旅行</view>
+        <view class="muted">从计划到出发，都在同一处继续。</view>
+      </view>
+      <button class="create-button" bindtap="createTrip" aria-label="创建旅行">＋</button>
+    </view>
+  </view>
+
+  <view wx:if="{{trips.length}}" class="trip-list">
+    <view
+      wx:for="{{trips}}"
+      wx:key="id"
+      class="trip-card"
+      data-id="{{item.id}}"
+      bindtap="openTrip"
+    >
+      <view class="trip-card__top">
+        <text class="trip-status">{{item.statusLabel}}</text>
+        <text class="trip-count">{{item.itemCount}} 项安排</text>
+      </view>
+      <view class="trip-title">{{item.title}}</view>
+      <view class="trip-destination">{{item.destination}}</view>
+      <view class="trip-date">{{item.startDate}} — {{item.endDate}}</view>
+    </view>
+  </view>
+
+  <view wx:else class="empty-state">
+    <view class="empty-title">还没有旅行</view>
+    <view class="muted">创建第一段旅程，把交通、酒店和活动放在一起。</view>
+    <button class="primary-button" bindtap="createTrip">创建旅行</button>
+  </view>
+</view>
+

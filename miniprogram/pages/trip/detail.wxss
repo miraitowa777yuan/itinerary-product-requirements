@@ -1,0 +1,171 @@
+.detail-page {
+  padding-bottom: 80rpx;
+}
+
+.trip-header {
+  padding: 34rpx 4rpx 52rpx;
+}
+
+.trip-meta {
+  margin-top: 16rpx;
+  color: #69736d;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+}
+
+.section-title {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.add-item {
+  margin: 0;
+  color: #1d4f42;
+  background: #e2ebe6;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.add-item::after,
+.ticketed-button::after {
+  border: 0;
+}
+
+.timeline-row {
+  display: grid;
+  grid-template-columns: 150rpx 34rpx 1fr;
+  min-height: 210rpx;
+}
+
+.time-column {
+  padding-top: 8rpx;
+  text-align: right;
+}
+
+.item-date {
+  color: #7a827d;
+  font-size: 20rpx;
+}
+
+.item-time {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.timeline-track {
+  position: relative;
+}
+
+.timeline-dot {
+  position: absolute;
+  z-index: 2;
+  top: 14rpx;
+  left: 10rpx;
+  width: 18rpx;
+  height: 18rpx;
+  border: 6rpx solid #dce9e3;
+  border-radius: 50%;
+  background: #1d4f42;
+}
+
+.timeline-dot--waiting {
+  border-color: #f5dfbc;
+  background: #b56a1b;
+}
+
+.timeline-line {
+  position: absolute;
+  top: 38rpx;
+  bottom: -10rpx;
+  left: 21rpx;
+  width: 2rpx;
+  background: #d9ddd9;
+}
+
+.item-card {
+  margin: 0 0 24rpx 16rpx;
+  padding: 28rpx;
+  border-radius: 26rpx;
+  background: #fff;
+  box-shadow: 0 10rpx 34rpx rgba(32, 37, 34, 0.05);
+}
+
+.item-topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-type {
+  color: #68716c;
+  font-size: 22rpx;
+}
+
+.status-pill {
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+  color: #1d4f42;
+  background: #e4eee9;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.status-pill--waiting {
+  color: #955613;
+  background: #fff0d7;
+}
+
+.item-title {
+  margin-top: 20rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.item-route,
+.item-detail {
+  margin-top: 10rpx;
+  color: #67706b;
+  font-size: 24rpx;
+}
+
+.booking-box {
+  margin-top: 24rpx;
+  padding: 20rpx;
+  border-radius: 18rpx;
+  color: #7b4c19;
+  background: #fff8eb;
+  font-size: 22rpx;
+  line-height: 1.8;
+}
+
+.ticketed-button {
+  margin: 18rpx 0 0;
+  color: #7b4c19;
+  background: #f6dfbb;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.empty-itinerary {
+  padding: 70rpx 40rpx;
+  border-radius: 28rpx;
+  text-align: center;
+  background: #fff;
+}
+
+.empty-title {
+  margin-bottom: 10rpx;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.empty-itinerary button {
+  margin-top: 30rpx;
+}
+

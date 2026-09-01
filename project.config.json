@@ -1,0 +1,21 @@
+{
+  "appid": "wx0fad508d57f7ec2b",
+  "compileType": "miniprogram",
+  "libVersion": "trial",
+  "miniprogramRoot": "miniprogram/",
+  "projectname": "itinerary-product",
+  "description": "跨端旅行行程管理小程序",
+  "setting": {
+    "useCompilerPlugins": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "urlCheck": true,
+    "coverView": true,
+    "showShadowRootInWxmlPanel": true,
+    "packNpmManually": false
+  },
+  "condition": {}
+}
+

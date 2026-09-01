@@ -1,0 +1,87 @@
+<view class="page-shell">
+  <text class="eyebrow">ITINERARY ITEM</text>
+  <view class="page-title">{{itemId ? '编辑行程' : '添加行程'}}</view>
+
+  <view class="form-card">
+    <view class="field">
+      <text class="field-label">类型 *</text>
+      <picker range="{{types}}" range-key="label" value="{{typeIndex}}" bindchange="updateType">
+        <view class="field-picker">{{types[typeIndex].label}}</view>
+      </picker>
+    </view>
+
+    <view class="field">
+      <text class="field-label">标题 *</text>
+      <input class="field-input" value="{{form.title}}" placeholder="例如：上海虹桥 → 杭州东" data-field="title" bindinput="updateField" />
+    </view>
+
+    <view class="field">
+      <text class="field-label">日期 *</text>
+      <picker mode="date" value="{{form.date}}" bindchange="updateDate">
+        <view class="field-picker">{{form.date || '选择日期'}}</view>
+      </picker>
+    </view>
+
+    <view class="time-fields">
+      <view class="field time-field">
+        <text class="field-label">开始时间</text>
+        <picker mode="time" value="{{form.startTime}}" bindchange="updateStartTime">
+          <view class="field-picker">{{form.startTime || '选择'}}</view>
+        </picker>
+      </view>
+      <view class="field time-field">
+        <text class="field-label">结束时间</text>
+        <picker mode="time" value="{{form.endTime}}" bindchange="updateEndTime">
+          <view class="field-picker">{{form.endTime || '选择'}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="field">
+      <text class="field-label">出发地 / 地点</text>
+      <input class="field-input" value="{{form.locationStart}}" placeholder="例如：上海虹桥站" data-field="locationStart" bindinput="updateField" />
+    </view>
+
+    <view class="field" wx:if="{{form.type === 'train' || form.type === 'flight' || form.type === 'local_transport'}}">
+      <text class="field-label">到达地</text>
+      <input class="field-input" value="{{form.locationEnd}}" placeholder="例如：杭州东站" data-field="locationEnd" bindinput="updateField" />
+    </view>
+
+    <view class="field" wx:if="{{form.type === 'train' || form.type === 'flight'}}">
+      <text class="field-label">车次 / 航班号</text>
+      <input class="field-input" value="{{form.transportNo}}" placeholder="例如：G7331" data-field="transportNo" bindinput="updateField" />
+    </view>
+
+    <block wx:if="{{form.type === 'train'}}">
+      <view class="waiting-switch">
+        <view>
+          <view class="waiting-title">待抢票</view>
+          <view class="muted waiting-help">尚未开售或尚未购买</view>
+        </view>
+        <switch checked="{{form.bookingStatus === 'waiting_to_book'}}" color="#B56A1B" bindchange="updateBookingStatus" />
+      </view>
+
+      <view wx:if="{{form.bookingStatus === 'waiting_to_book'}}" class="waiting-fields">
+        <view class="field">
+          <text class="field-label">预计开售时间</text>
+          <input class="field-input" value="{{form.expectedSaleAt}}" placeholder="例如：2026-09-17 08:00" data-field="expectedSaleAt" bindinput="updateField" />
+        </view>
+        <view class="field">
+          <text class="field-label">期望席别</text>
+          <input class="field-input" value="{{form.preferredSeatClass}}" placeholder="例如：二等座" data-field="preferredSeatClass" bindinput="updateField" />
+        </view>
+      </view>
+    </block>
+
+    <view class="field">
+      <text class="field-label">备注</text>
+      <textarea class="field-textarea" value="{{form.notes}}" placeholder="补充集合、入住或提醒信息" data-field="notes" bindinput="updateField" />
+    </view>
+  </view>
+
+  <view class="form-actions">
+    <button wx:if="{{itemId}}" class="danger-button" bindtap="remove">删除</button>
+    <button class="primary-button" bindtap="save">保存</button>
+  </view>
+</view>
+

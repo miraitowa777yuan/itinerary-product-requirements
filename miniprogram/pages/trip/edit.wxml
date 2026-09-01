@@ -1,0 +1,33 @@
+<view class="page-shell">
+  <text class="eyebrow">NEW JOURNEY</text>
+  <view class="page-title">创建旅行</view>
+  <view class="muted">只填必要信息，其他内容可以稍后补充。</view>
+
+  <view class="form-card">
+    <view class="field">
+      <text class="field-label">旅行名称 *</text>
+      <input class="field-input" placeholder="例如：国庆东京六日行" data-field="title" bindinput="updateField" />
+    </view>
+    <view class="field">
+      <text class="field-label">目的地</text>
+      <input class="field-input" placeholder="例如：东京 · 镰仓" data-field="destination" bindinput="updateField" />
+    </view>
+    <view class="field">
+      <text class="field-label">开始日期 *</text>
+      <picker mode="date" value="{{form.startDate}}" bindchange="updateStartDate">
+        <view class="field-picker">{{form.startDate || '选择日期'}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">结束日期 *</text>
+      <picker mode="date" value="{{form.endDate}}" bindchange="updateEndDate">
+        <view class="field-picker">{{form.endDate || '选择日期'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="form-actions">
+    <button class="primary-button" bindtap="save">保存并添加行程</button>
+  </view>
+</view>
+

@@ -1,0 +1,50 @@
+<view wx:if="{{trip}}" class="page-shell detail-page">
+  <view class="trip-header">
+    <text class="eyebrow">{{trip.statusLabel}}</text>
+    <view class="page-title">{{trip.title}}</view>
+    <view class="trip-meta">{{trip.destination}} · {{trip.startDate}}—{{trip.endDate}}</view>
+  </view>
+
+  <view class="section-heading">
+    <view>
+      <view class="section-title">全程安排</view>
+      <view class="muted">按当地日期与时间排列</view>
+    </view>
+    <button class="add-item" bindtap="addItem">添加</button>
+  </view>
+
+  <view wx:if="{{items.length}}" class="timeline">
+    <view wx:for="{{items}}" wx:key="id" class="timeline-row">
+      <view class="time-column">
+        <view class="item-date">{{item.date}}</view>
+        <view class="item-time">{{item.timeLabel}}</view>
+      </view>
+      <view class="timeline-track">
+        <view class="timeline-dot {{item.isWaitingToBook ? 'timeline-dot--waiting' : ''}}"></view>
+        <view class="timeline-line"></view>
+      </view>
+      <view class="item-card" data-id="{{item.id}}" bindtap="editItem">
+        <view class="item-topline">
+          <text class="item-type">{{item.typeLabel}}</text>
+          <text class="status-pill {{item.isWaitingToBook ? 'status-pill--waiting' : ''}}">{{item.bookingStatusLabel}}</text>
+        </view>
+        <view class="item-title">{{item.title}}</view>
+        <view wx:if="{{item.hasRoute}}" class="item-route">{{item.locationStart}} → {{item.locationEnd}}</view>
+        <view wx:else class="item-route">{{item.locationStart}}</view>
+        <view wx:if="{{item.transportNo}}" class="item-detail">{{item.transportNo}}</view>
+        <view wx:if="{{item.isWaitingToBook}}" class="booking-box">
+          <view>预计开售：{{item.expectedSaleAt || '尚未填写'}}</view>
+          <view wx:if="{{item.preferredSeatClass}}">期望席别：{{item.preferredSeatClass}}</view>
+          <button class="ticketed-button" catchtap="markTicketed" data-id="{{item.id}}">标记已出票</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty-itinerary">
+    <view class="empty-title">行程还是空的</view>
+    <view class="muted">先加入一段交通或一家酒店。</view>
+    <button class="primary-button" bindtap="addItem">添加第一项</button>
+  </view>
+</view>
+

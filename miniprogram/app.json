@@ -1,0 +1,18 @@
+{
+  "pages": [
+    "pages/trips/index",
+    "pages/trip/detail",
+    "pages/trip/edit",
+    "pages/item/edit"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#F6F5F1",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "行程计划器",
+    "backgroundColor": "#F6F5F1",
+    "backgroundTextStyle": "dark"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
+

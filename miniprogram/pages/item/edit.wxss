@@ -1,0 +1,36 @@
+.time-fields {
+  display: flex;
+  gap: 20rpx;
+}
+
+.time-field {
+  flex: 1;
+}
+
+.waiting-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28rpx;
+  padding: 24rpx;
+  border-radius: 20rpx;
+  background: #fff5e4;
+}
+
+.waiting-title {
+  color: #8b5115;
+  font-weight: 700;
+}
+
+.waiting-help {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+}
+
+.waiting-fields {
+  margin-bottom: 28rpx;
+  padding: 24rpx;
+  border: 2rpx solid #f0dfc2;
+  border-radius: 20rpx;
+}
+

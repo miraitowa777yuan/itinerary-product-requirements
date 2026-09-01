@@ -1,0 +1,86 @@
+.hero {
+  padding: 36rpx 4rpx 28rpx;
+}
+
+.hero-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.create-button {
+  width: 92rpx;
+  height: 92rpx;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: #1d4f42;
+  font-size: 48rpx;
+  line-height: 88rpx;
+}
+
+.create-button::after {
+  border: 0;
+}
+
+.trip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.trip-card {
+  padding: 34rpx;
+  border-radius: 32rpx;
+  background: #fff;
+  box-shadow: 0 14rpx 42rpx rgba(32, 37, 34, 0.06);
+}
+
+.trip-card__top {
+  display: flex;
+  justify-content: space-between;
+  color: #6a746e;
+  font-size: 22rpx;
+}
+
+.trip-status {
+  color: #1d4f42;
+  font-weight: 700;
+}
+
+.trip-title {
+  margin-top: 30rpx;
+  font-size: 42rpx;
+  font-weight: 700;
+}
+
+.trip-destination {
+  margin-top: 8rpx;
+  color: #515a55;
+}
+
+.trip-date {
+  margin-top: 32rpx;
+  color: #8a6750;
+  font-size: 24rpx;
+}
+
+.empty-state {
+  margin-top: 100rpx;
+  padding: 54rpx 40rpx;
+  border-radius: 32rpx;
+  text-align: center;
+  background: #fff;
+}
+
+.empty-title {
+  margin-bottom: 12rpx;
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.empty-state button {
+  margin-top: 34rpx;
+}
+
