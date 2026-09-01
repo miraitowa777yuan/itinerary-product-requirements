@@ -1,3 +1,105 @@
+.page-shell {
+  padding-bottom: 70rpx;
+}
+
+.entry-switch {
+  display: flex;
+  margin-top: 28rpx;
+  padding: 6rpx;
+  border-radius: 20rpx;
+  background: #e8e9e5;
+}
+
+.entry-option {
+  flex: 1;
+  padding: 18rpx 12rpx;
+  border-radius: 16rpx;
+  color: #6f7772;
+  text-align: center;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+
+.entry-option--active {
+  color: #17483c;
+  background: #fff;
+  box-shadow: 0 6rpx 18rpx rgba(32, 37, 34, 0.08);
+}
+
+.ocr-canvas {
+  position: fixed;
+  z-index: -1;
+  top: -10px;
+  left: -10px;
+  width: 2px;
+  height: 2px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scan-card {
+  margin-top: 24rpx;
+  padding: 28rpx;
+  border: 2rpx solid #dce7e1;
+  border-radius: 24rpx;
+  background: #eef5f1;
+}
+
+.scan-title {
+  color: #17483c;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.scan-help {
+  margin-top: 10rpx;
+  color: #68756f;
+  font-size: 22rpx;
+  line-height: 1.6;
+}
+
+.scan-preview {
+  width: 100%;
+  height: 320rpx;
+  margin-top: 22rpx;
+  border-radius: 18rpx;
+  background: #dde5e0;
+}
+
+.scan-actions {
+  display: flex;
+  gap: 18rpx;
+  margin-top: 22rpx;
+}
+
+.scan-actions .secondary-button,
+.scan-actions .primary-button {
+  flex: 1;
+  margin: 0;
+  font-size: 24rpx;
+}
+
+.scan-message {
+  margin-top: 18rpx;
+  color: #52635b;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.scan-message--error {
+  color: #9f3229;
+}
+
+.review-banner {
+  margin-bottom: 28rpx;
+  padding: 20rpx 22rpx;
+  border-radius: 16rpx;
+  color: #7b4c19;
+  background: #fff4df;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
 .time-fields {
   display: flex;
   gap: 20rpx;
@@ -39,4 +141,66 @@
   color: #8a928d;
   font-size: 21rpx;
   line-height: 1.5;
+}
+
+.airline-hint {
+  color: #1d4f42;
+  font-weight: 700;
+}
+
+.hub-field {
+  position: relative;
+}
+
+.suggestion-list {
+  position: relative;
+  z-index: 4;
+  overflow: hidden;
+  margin-top: 8rpx;
+  border: 2rpx solid #dfe4e0;
+  border-radius: 18rpx;
+  background: #fff;
+  box-shadow: 0 12rpx 28rpx rgba(32, 37, 34, 0.1);
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22rpx 24rpx;
+  border-bottom: 2rpx solid #f0f1ee;
+  color: #27312c;
+  font-size: 25rpx;
+}
+
+.suggestion-item:last-child {
+  border-bottom: 0;
+}
+
+.suggestion-city {
+  margin-left: 20rpx;
+  color: #89918d;
+  font-size: 21rpx;
+}
+
+.selected-hub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-top: 12rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 16rpx;
+  color: #17483c;
+  background: #e7f1ec;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.terminal-pill {
+  flex: none;
+  padding: 6rpx 12rpx;
+  border-radius: 999rpx;
+  background: #cfe3d9;
+  font-size: 20rpx;
 }

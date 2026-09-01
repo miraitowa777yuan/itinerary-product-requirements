@@ -2,7 +2,27 @@
   <text class="eyebrow">ITINERARY ITEM</text>
   <view class="page-title">{{itemId ? '编辑行程' : '添加行程'}}</view>
 
+  <view class="entry-switch" aria-label="选择录入方式">
+    <view class="entry-option {{entryMode === 'manual' ? 'entry-option--active' : ''}}" role="button" data-mode="manual" bindtap="changeEntryMode">手动录入</view>
+    <view class="entry-option {{entryMode === 'scan' ? 'entry-option--active' : ''}}" role="button" data-mode="scan" bindtap="changeEntryMode">截图识别</view>
+  </view>
+
+  <canvas type="webgl" id="ocr-canvas" class="ocr-canvas"></canvas>
+
+  <view wx:if="{{entryMode === 'scan'}}" class="scan-card">
+    <view class="scan-title">从订单截图提取行程</view>
+    <view class="scan-help">图片只在本机识别，不会保存到行程；识别后请核对下方内容。</view>
+    <image wx:if="{{screenshotPath}}" class="scan-preview" src="{{screenshotPath}}" mode="aspectFit" />
+    <view class="scan-actions">
+      <button class="secondary-button" bindtap="chooseScreenshot">{{screenshotPath ? '更换截图' : '选择截图'}}</button>
+      <button class="primary-button" disabled="{{!screenshotPath || ocrStatus === 'recognizing'}}" bindtap="recognizeScreenshot">{{ocrStatus === 'recognizing' ? '识别中…' : '开始识别'}}</button>
+    </view>
+    <view wx:if="{{ocrMessage}}" class="scan-message scan-message--{{ocrStatus}}">{{ocrMessage}}</view>
+  </view>
+
   <view class="form-card">
+    <view wx:if="{{entryMode === 'scan' && ocrStatus === 'done'}}" class="review-banner">请检查识别结果，确认无误后再保存</view>
+
     <view class="field">
       <text class="field-label">类型 *</text>
       <picker range="{{types}}" range-key="label" value="{{typeIndex}}" bindchange="updateType">
@@ -11,18 +31,18 @@
     </view>
 
     <view class="field">
-      <text class="field-label">标题 *</text>
-      <input class="field-input" value="{{form.title}}" placeholder="例如：银座酒店 / 上海虹桥 → 杭州东" data-field="title" bindinput="updateField" />
+      <text class="field-label">{{form.type === 'hotel' ? '酒店名称 *' : '标题 *'}}</text>
+      <input class="field-input" value="{{form.title}}" placeholder="{{form.type === 'hotel' ? '例如：上海外滩华尔道夫酒店' : '例如：上海 → 杭州'}}" placeholder-class="field-placeholder" data-field="title" bindinput="updateField" />
     </view>
 
     <block wx:if="{{form.type === 'hotel'}}">
       <view class="field">
         <text class="field-label">酒店城市</text>
-        <input class="field-input" value="{{form.city}}" placeholder="例如：东京" data-field="city" bindinput="updateField" />
+        <input class="field-input" value="{{form.city}}" placeholder="例如：上海" placeholder-class="field-placeholder" data-field="city" bindinput="updateField" />
       </view>
       <view class="field">
         <text class="field-label">房型</text>
-        <input class="field-input" value="{{form.roomType}}" placeholder="例如：豪华双床房" data-field="roomType" bindinput="updateField" />
+        <input class="field-input" value="{{form.roomType}}" placeholder="例如：豪华双床房" placeholder-class="field-placeholder" data-field="roomType" bindinput="updateField" />
       </view>
     </block>
 
@@ -55,61 +75,94 @@
       </view>
     </view>
 
-    <view class="field">
+    <block wx:if="{{form.type === 'flight' || form.type === 'train'}}">
+      <view class="field hub-field">
+        <text class="field-label">出发城市与{{form.type === 'flight' ? '机场' : '车站'}}</text>
+        <input class="field-input" value="{{form.locationStartCity}}" placeholder="输入中国城市，例如：上海" placeholder-class="field-placeholder" data-side="start" bindinput="updateLocationQuery" />
+        <view wx:if="{{startSuggestions.length}}" class="suggestion-list">
+          <view wx:for="{{startSuggestions}}" wx:key="name" class="suggestion-item" role="button" data-side="start" data-index="{{index}}" bindtap="selectHub">
+            <text>{{item.name}}</text><text class="suggestion-city">{{item.city}}</text>
+          </view>
+        </view>
+        <view wx:if="{{form.locationStart}}" class="selected-hub">
+          <text>{{form.locationStart}}</text>
+          <text wx:if="{{form.departureTerminal}}" class="terminal-pill">{{form.departureTerminal}}</text>
+        </view>
+      </view>
+
+      <view class="field hub-field">
+        <text class="field-label">到达城市与{{form.type === 'flight' ? '机场' : '车站'}}</text>
+        <input class="field-input" value="{{form.locationEndCity}}" placeholder="输入中国城市，例如：北京" placeholder-class="field-placeholder" data-side="end" bindinput="updateLocationQuery" />
+        <view wx:if="{{endSuggestions.length}}" class="suggestion-list">
+          <view wx:for="{{endSuggestions}}" wx:key="name" class="suggestion-item" role="button" data-side="end" data-index="{{index}}" bindtap="selectHub">
+            <text>{{item.name}}</text><text class="suggestion-city">{{item.city}}</text>
+          </view>
+        </view>
+        <view wx:if="{{form.locationEnd}}" class="selected-hub">
+          <text>{{form.locationEnd}}</text>
+          <text wx:if="{{form.arrivalTerminal}}" class="terminal-pill">{{form.arrivalTerminal}}</text>
+        </view>
+      </view>
+    </block>
+
+    <view class="field" wx:if="{{form.type !== 'hotel' && form.type !== 'flight' && form.type !== 'train'}}">
       <text class="field-label">出发地 / 地点</text>
-      <input class="field-input" value="{{form.locationStart}}" placeholder="例如：上海虹桥站" data-field="locationStart" bindinput="updateField" />
+      <input class="field-input" value="{{form.locationStart}}" placeholder="例如：上海长途客运南站" placeholder-class="field-placeholder" data-field="locationStart" bindinput="updateField" />
     </view>
 
-    <view class="field" wx:if="{{form.type === 'train' || form.type === 'flight' || form.type === 'intercity_bus' || form.type === 'local_transport'}}">
+    <view class="field" wx:if="{{form.type === 'intercity_bus' || form.type === 'local_transport'}}">
       <text class="field-label">到达地</text>
-      <input class="field-input" value="{{form.locationEnd}}" placeholder="例如：杭州东站" data-field="locationEnd" bindinput="updateField" />
+      <input class="field-input" value="{{form.locationEnd}}" placeholder="例如：杭州汽车客运中心" placeholder-class="field-placeholder" data-field="locationEnd" bindinput="updateField" />
     </view>
 
     <view class="field" wx:if="{{form.type === 'train' || form.type === 'flight' || form.type === 'intercity_bus'}}">
-      <text class="field-label">车次 / 航班号 / 班次</text>
-      <input class="field-input" value="{{form.transportNo}}" placeholder="例如：G7331" data-field="transportNo" bindinput="updateField" />
+      <text class="field-label">{{form.type === 'flight' ? '航班号' : (form.type === 'train' ? '车次' : '班次')}}</text>
+      <input class="field-input" value="{{form.transportNo}}" placeholder="{{form.type === 'flight' ? '例如：CA145' : (form.type === 'train' ? '例如：G7331' : '例如：沪杭快线 08:00')}}" placeholder-class="field-placeholder" bindinput="updateTransportNo" />
+      <view wx:if="{{form.type === 'flight' && form.airlineName}}" class="field-help airline-hint">{{form.airlineName}}</view>
     </view>
 
     <view class="field" wx:if="{{form.type === 'flight'}}">
       <text class="field-label">舱位</text>
-      <input class="field-input" value="{{form.cabinClass}}" placeholder="例如：经济舱 Y" data-field="cabinClass" bindinput="updateField" />
+      <picker range="{{flightClasses}}" value="{{cabinClassIndex}}" bindchange="updateCabinClass">
+        <view class="field-picker">{{form.cabinClass || '选择舱位'}}</view>
+      </picker>
     </view>
 
     <view class="field" wx:if="{{form.type === 'train'}}">
       <text class="field-label">席别</text>
-      <input class="field-input" value="{{form.seatClass}}" placeholder="例如：二等座" data-field="seatClass" bindinput="updateField" />
+      <picker range="{{trainClasses}}" value="{{seatClassIndex}}" bindchange="updateSeatClass">
+        <view class="field-picker">{{form.seatClass || '选择席别'}}</view>
+      </picker>
     </view>
 
     <block wx:if="{{form.type === 'train'}}">
       <view class="waiting-switch">
-        <view>
-          <view class="waiting-title">待抢票</view>
-          <view class="muted waiting-help">尚未开售或尚未购买</view>
-        </view>
+        <view><view class="waiting-title">待抢票</view><view class="muted waiting-help">尚未开售或尚未购买</view></view>
         <switch checked="{{form.bookingStatus === 'waiting_to_book'}}" color="#B56A1B" bindchange="updateBookingStatus" />
       </view>
-
       <view wx:if="{{form.bookingStatus === 'waiting_to_book'}}" class="waiting-fields">
         <view class="field">
           <text class="field-label">预计开售时间</text>
-          <input class="field-input" value="{{form.expectedSaleAt}}" placeholder="例如：2026-09-17 08:00" data-field="expectedSaleAt" bindinput="updateField" />
+          <input class="field-input" value="{{form.expectedSaleAt}}" placeholder="例如：2026-09-17 08:00" placeholder-class="field-placeholder" data-field="expectedSaleAt" bindinput="updateField" />
         </view>
         <view class="field">
           <text class="field-label">期望席别</text>
-          <input class="field-input" value="{{form.preferredSeatClass}}" placeholder="例如：二等座" data-field="preferredSeatClass" bindinput="updateField" />
+          <picker range="{{trainClasses}}" value="{{preferredSeatClassIndex}}" bindchange="updatePreferredSeatClass">
+            <view class="field-picker">{{form.preferredSeatClass || '选择期望席别'}}</view>
+          </picker>
         </view>
       </view>
     </block>
 
     <view class="field">
       <text class="field-label">到下一项行程的驾车时长</text>
-      <input class="field-input" type="number" value="{{form.driveToNextMinutes}}" placeholder="填写分钟数，例如：45" data-field="driveToNextMinutes" bindinput="updateField" />
+      <input class="field-input" type="number" value="{{form.driveToNextMinutes}}" placeholder="填写分钟数，例如：45" placeholder-class="field-placeholder" data-field="driveToNextMinutes" bindinput="updateField" />
       <view class="field-help">从这一项的到达地或地点，驾车前往时间线下一项。</view>
     </view>
 
     <view class="field">
       <text class="field-label">备注</text>
-      <textarea class="field-textarea" value="{{form.notes}}" placeholder="补充集合、入住或提醒信息" data-field="notes" bindinput="updateField" />
+      <textarea class="field-textarea" value="{{form.notes}}" placeholder="补充集合、入住或提醒信息" placeholder-class="field-placeholder" data-field="notes" bindinput="updateField" />
     </view>
   </view>
 

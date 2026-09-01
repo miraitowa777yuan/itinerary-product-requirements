@@ -1,3 +1,5 @@
+const { airlineFromFlightNo } = require('./transport-data')
+
 const TYPE_LABELS = {
   flight: '航班',
   train: '高铁 / 火车',
@@ -40,7 +42,11 @@ function presentItem(item) {
     hasRoute: Boolean(item.locationEnd),
     timeLabel: item.startTime ? `${item.startTime}${item.endTime ? `–${item.endTime}` : ''}` : '当天',
     travelClassLabel: item.seatClass || item.cabinClass || item.preferredSeatClass || '',
-    hotelMetaLabel: [item.city, item.roomType, item.checkOutDate ? `退房 ${item.checkOutDate}` : ''].filter(Boolean).join(' · ')
+    hotelMetaLabel: [item.city, item.roomType, item.checkOutDate ? `退房 ${item.checkOutDate}` : ''].filter(Boolean).join(' · '),
+    airlineName: item.type === 'flight' ? (item.airlineName || airlineFromFlightNo(item.transportNo)) : '',
+    terminalLabel: item.type === 'flight'
+      ? [item.departureTerminal ? `出发 ${item.departureTerminal}` : '', item.arrivalTerminal ? `到达 ${item.arrivalTerminal}` : ''].filter(Boolean).join(' · ')
+      : ''
   })
 }
 

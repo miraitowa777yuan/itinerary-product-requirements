@@ -90,14 +90,34 @@ button {
 .field-textarea {
   box-sizing: border-box;
   width: 100%;
-  padding: 22rpx 24rpx;
   border: 2rpx solid #e3e5e1;
   border-radius: 18rpx;
+  color: #202522;
   background: #fafaf8;
+  font-size: 28rpx;
+}
+
+.field-input {
+  height: 88rpx;
+  padding: 0 24rpx;
+  line-height: 88rpx;
+}
+
+.field-picker {
+  display: flex;
+  min-height: 88rpx;
+  align-items: center;
+  padding: 0 24rpx;
+}
+
+.field-placeholder {
+  color: #a0a7a3;
 }
 
 .field-textarea {
   min-height: 160rpx;
+  padding: 22rpx 24rpx;
+  line-height: 1.6;
 }
 
 .form-actions {
@@ -109,4 +129,3 @@ button {
 .form-actions button {
   flex: 1;
 }
-

@@ -10,7 +10,7 @@
       <view class="section-title">全程安排</view>
       <view class="muted">按当地日期与时间排列</view>
     </view>
-    <button class="add-item" bindtap="addItem">手动添加</button>
+    <button class="add-item" bindtap="addItem">添加行程</button>
   </view>
 
   <view wx:if="{{items.length}}" class="timeline">
@@ -29,9 +29,11 @@
           <text class="status-pill {{item.isWaitingToBook ? 'status-pill--waiting' : ''}}">{{item.bookingStatusLabel}}</text>
         </view>
         <view class="item-title">{{item.title}}</view>
-        <view wx:if="{{item.hasRoute}}" class="item-route">{{item.locationStart}} → {{item.locationEnd}}</view>
-        <view wx:else class="item-route">{{item.locationStart}}</view>
+        <view wx:if="{{item.locationStart && item.hasRoute}}" class="item-route">{{item.locationStart}} → {{item.locationEnd}}</view>
+        <view wx:elif="{{item.locationStart}}" class="item-route">{{item.locationStart}}</view>
+        <view wx:if="{{item.airlineName}}" class="item-detail item-airline">{{item.airlineName}}</view>
         <view wx:if="{{item.transportNo}}" class="item-detail">{{item.transportNo}}</view>
+        <view wx:if="{{item.terminalLabel}}" class="item-detail">{{item.terminalLabel}}</view>
         <view wx:if="{{item.travelClassLabel}}" class="item-detail">舱位 / 席别：{{item.travelClassLabel}}</view>
         <view wx:if="{{item.hotelMetaLabel}}" class="item-detail">{{item.hotelMetaLabel}}</view>
         <view wx:if="{{item.isWaitingToBook}}" class="booking-box">

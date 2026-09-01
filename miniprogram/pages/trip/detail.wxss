@@ -135,6 +135,11 @@
   font-size: 24rpx;
 }
 
+.item-airline {
+  color: #1d4f42;
+  font-weight: 700;
+}
+
 .booking-box {
   margin-top: 24rpx;
   padding: 20rpx;
