@@ -7,7 +7,14 @@ Page({
   },
 
   onShow() {
+    this.updateTabBar(1)
     this.loadTrips()
+  },
+
+  updateTabBar(selected) {
+    if (typeof this.getTabBar !== 'function') return
+    const tabBar = this.getTabBar()
+    if (tabBar) tabBar.setData({ selected })
   },
 
   loadTrips() {

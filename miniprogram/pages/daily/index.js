@@ -8,8 +8,15 @@ Page({
   },
 
   onShow() {
+    this.updateTabBar(0)
     tripStore.ensureDailyTrip()
     this.loadTrip()
+  },
+
+  updateTabBar(selected) {
+    if (typeof this.getTabBar !== 'function') return
+    const tabBar = this.getTabBar()
+    if (tabBar) tabBar.setData({ selected })
   },
 
   loadTrip() {

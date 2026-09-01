@@ -1,0 +1,14 @@
+<view class="tabbar" role="navigation" aria-label="底部导航">
+  <view
+    wx:for="{{tabs}}"
+    wx:key="pagePath"
+    class="tab-item {{selected === index ? 'tab-item--active' : ''}}"
+    role="button"
+    aria-label="{{item.text}}"
+    data-path="{{item.pagePath}}"
+    bindtap="switchTab"
+  >
+    <view class="tab-indicator"></view>
+    <text class="tab-label">{{item.text}}</text>
+  </view>
+</view>
