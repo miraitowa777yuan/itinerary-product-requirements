@@ -6,6 +6,8 @@
 - 截图通过 `wx.chooseMedia` 选择，只在本机内存中处理，不上传、不长期保存。
 - 文字识别调用微信客户端的 `wx.createVKSession({ track: { OCR: { mode: 2 } } })` 与 `session.runOCR`。
 - OCR 会话持续运行 `requestAnimationFrame` / `getVKFrame` 帧循环，同时接收 `addAnchors` 与 `updateAnchors`，并在结果稳定后合并文字。
+- WebGL 画布保留在可渲染区域并将帧率限制为 30 FPS，避免 iOS 暂停完全隐藏画布的 VisionKit 会话。
+- 超长订单截图按最高 1600 像素高度切成带重叠区的片段，逐段识别后去重合并，避免整张长图无结果。
 - 识别出的文字由仓库内 `miniprogram/utils/order-parser.js` 解析为酒店、航班、火车或城际巴士字段。
 - 自动结果不会直接保存，用户必须在同一编辑页检查后主动点击“保存”。
 

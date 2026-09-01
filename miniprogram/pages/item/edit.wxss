@@ -28,12 +28,12 @@
 
 .ocr-canvas {
   position: fixed;
-  z-index: -1;
-  top: -10px;
-  left: -10px;
-  width: 2px;
-  height: 2px;
-  opacity: 0;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 80vh;
+  opacity: 0.001;
   pointer-events: none;
 }
 

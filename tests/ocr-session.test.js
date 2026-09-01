@@ -41,6 +41,22 @@ assert.ok(nextFrame)
 nextFrame()
 assert.strictEqual(frameCalls, 1)
 
+const portraitTiles = pageDefinition.buildOcrTiles({ width: 1206, height: 2622 })
+assert.strictEqual(portraitTiles.length, 2)
+assert.deepStrictEqual(portraitTiles[0], {
+  sourceY: 0,
+  sourceHeight: 1600,
+  outputWidth: 1206,
+  outputHeight: 1600
+})
+assert.strictEqual(portraitTiles[1].sourceY, 1440)
+assert.strictEqual(portraitTiles[1].sourceHeight, 1182)
+
+const wideTiles = pageDefinition.buildOcrTiles({ width: 2800, height: 1600 })
+assert.strictEqual(wideTiles.length, 1)
+assert.strictEqual(wideTiles[0].outputWidth, 1400)
+assert.strictEqual(wideTiles[0].outputHeight, 800)
+
 let stopped = false
 const resetContext = {
   _ocrSession: { stop() { stopped = true } },

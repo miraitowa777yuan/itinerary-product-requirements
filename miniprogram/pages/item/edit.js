@@ -157,6 +157,7 @@ Page({
     wx.chooseMedia({
       count: 1, mediaType: ['image'], sourceType: ['album'],
       success: result => {
+        this.resetOcrSession()
         const screenshotPath = result.tempFiles[0].tempFilePath
         this.setData({ screenshotPath, ocrStatus: 'ready', ocrMessage: '图片已选择，可以开始识别。' })
       }
@@ -202,12 +203,18 @@ Page({
   },
 
   startOcrFrameLoop(session, canvas) {
-    const onFrame = () => {
+    const frameInterval = 1000 / 30
+    let lastFrameAt = 0
+    const onFrame = timestamp => {
       if (this._ocrSession !== session) return
-      try {
-        session.getVKFrame(canvas.width, canvas.height)
-      } catch (error) {
-        return
+      const frameAt = Number.isFinite(timestamp) ? timestamp : Date.now()
+      if (!lastFrameAt || frameAt - lastFrameAt >= frameInterval) {
+        lastFrameAt = frameAt
+        try {
+          session.getVKFrame(canvas.width, canvas.height)
+        } catch (error) {
+          // A transient frame failure must not stop the VisionKit render loop.
+        }
       }
       session.requestAnimationFrame(onFrame)
     }
@@ -217,7 +224,9 @@ Page({
   resetOcrSession() {
     if (this._ocrTimer) clearTimeout(this._ocrTimer)
     if (this._ocrResultTimer) clearTimeout(this._ocrResultTimer)
-    if (this._ocrSession && this._ocrSession.stop) this._ocrSession.stop()
+    if (this._ocrSession && this._ocrSession.stop) {
+      try { this._ocrSession.stop() } catch (error) {}
+    }
     this._ocrTimer = null
     this._ocrResultTimer = null
     this._ocrSession = null
@@ -226,6 +235,7 @@ Page({
     this._ocrResolve = null
     this._ocrReject = null
     this._ocrChunks = []
+    this._ocrRequestToken = (this._ocrRequestToken || 0) + 1
   },
 
   handleOcrAnchors(anchors) {
@@ -253,6 +263,61 @@ Page({
     resolve(text)
   },
 
+  buildOcrTiles(imageInfo) {
+    const sourceWidth = imageInfo.width
+    const sourceHeight = imageInfo.height
+    const outputWidth = Math.max(1, Math.round(Math.min(sourceWidth, 1400)))
+    const scale = outputWidth / sourceWidth
+    const maxOutputHeight = 1600
+    const overlapOutputHeight = 160
+    const sourceTileHeight = maxOutputHeight / scale
+    const sourceStep = (maxOutputHeight - overlapOutputHeight) / scale
+    const tiles = []
+    let sourceY = 0
+    while (sourceY < sourceHeight) {
+      const height = Math.min(sourceTileHeight, sourceHeight - sourceY)
+      tiles.push({
+        sourceY: Math.round(sourceY),
+        sourceHeight: Math.round(height),
+        outputWidth,
+        outputHeight: Math.max(1, Math.round(height * scale))
+      })
+      if (sourceY + height >= sourceHeight) break
+      sourceY += sourceStep
+    }
+    return tiles
+  },
+
+  runOcrBuffer(session, imageData, width, height, timeoutMs) {
+    return new Promise((resolve, reject) => {
+      const requestToken = (this._ocrRequestToken || 0) + 1
+      this._ocrRequestToken = requestToken
+      this._ocrResolve = resolve
+      this._ocrReject = reject
+      this._ocrChunks = []
+      const finishWithError = error => {
+        if (this._ocrRequestToken !== requestToken || !this._ocrReject) return
+        const rejectRequest = this._ocrReject
+        if (this._ocrTimer) clearTimeout(this._ocrTimer)
+        if (this._ocrResultTimer) clearTimeout(this._ocrResultTimer)
+        this._ocrResolve = null
+        this._ocrReject = null
+        this._ocrTimer = null
+        this._ocrResultTimer = null
+        this._ocrChunks = []
+        rejectRequest(error)
+      }
+      this._ocrTimer = setTimeout(() => {
+        finishWithError(new Error('OCR_TILE_TIMEOUT'))
+      }, timeoutMs || 12000)
+      try {
+        session.runOCR({ frameBuffer: imageData.data.buffer, width, height })
+      } catch (error) {
+        finishWithError(error)
+      }
+    })
+  },
+
   async recognizeScreenshot() {
     if (!this.data.screenshotPath || this.data.ocrStatus === 'recognizing') return
     this.setData({ ocrStatus: 'recognizing', ocrMessage: '正在本地识别，请稍候…' })
@@ -262,14 +327,8 @@ Page({
       const imageInfo = await new Promise((resolve, reject) => {
         wx.getImageInfo({ src: this.data.screenshotPath, success: resolve, fail: reject })
       })
-      const maxWidth = 1440
-      const maxHeight = 3600
-      const maxPixels = 3500000
-      const pixelScale = Math.sqrt(maxPixels / (imageInfo.width * imageInfo.height))
-      const scale = Math.min(1, maxWidth / imageInfo.width, maxHeight / imageInfo.height, pixelScale)
-      const width = Math.max(1, Math.round(imageInfo.width * scale))
-      const height = Math.max(1, Math.round(imageInfo.height * scale))
-      const canvas = wx.createOffscreenCanvas({ type: '2d', width, height })
+      const tiles = this.buildOcrTiles(imageInfo)
+      const canvas = wx.createOffscreenCanvas({ type: '2d', width: 1, height: 1 })
       const context = canvas.getContext('2d')
       const image = canvas.createImage()
       await new Promise((resolve, reject) => {
@@ -277,30 +336,33 @@ Page({
         image.onerror = reject
         image.src = this.data.screenshotPath
       })
-      context.clearRect(0, 0, width, height)
-      context.drawImage(image, 0, 0, width, height)
-      const imageData = context.getImageData(0, 0, width, height)
-      const recognizedText = await new Promise((resolve, reject) => {
-        this._ocrResolve = resolve
-        this._ocrReject = reject
-        this._ocrChunks = []
-        const failRecognition = error => {
-          if (!this._ocrReject) return
-          const rejectRequest = this._ocrReject
-          this._ocrResolve = null
-          this._ocrReject = null
-          this.resetOcrSession()
-          rejectRequest(error)
-        }
-        this._ocrTimer = setTimeout(() => {
-          failRecognition(new Error('识别暂未返回结果，请重试或切换手动录入'))
-        }, 30000)
+      const recognizedParts = []
+      for (let index = 0; index < tiles.length; index += 1) {
+        const tile = tiles[index]
+        canvas.width = tile.outputWidth
+        canvas.height = tile.outputHeight
+        context.clearRect(0, 0, tile.outputWidth, tile.outputHeight)
+        context.drawImage(
+          image,
+          0, tile.sourceY, imageInfo.width, tile.sourceHeight,
+          0, 0, tile.outputWidth, tile.outputHeight
+        )
+        const imageData = context.getImageData(0, 0, tile.outputWidth, tile.outputHeight)
+        this.setData({ ocrMessage: `正在识别第 ${index + 1}/${tiles.length} 段…` })
         try {
-          session.runOCR({ frameBuffer: imageData.data.buffer, width, height })
+          const part = await this.runOcrBuffer(
+            session, imageData, tile.outputWidth, tile.outputHeight, 12000
+          )
+          if (part && !recognizedParts.includes(part)) recognizedParts.push(part)
         } catch (error) {
-          failRecognition(error)
+          if (!error || error.message !== 'OCR_TILE_TIMEOUT') throw error
         }
-      })
+      }
+      const recognizedText = recognizedParts.join('\n').trim()
+      if (!recognizedText) {
+        this.resetOcrSession()
+        throw new Error('本机 OCR 未返回文字。请裁剪掉截图空白区域后重试，或切换手动录入。')
+      }
       this.applyRecognizedText(recognizedText)
     } catch (error) {
       const rawMessage = error && error.message ? error.message : ''
