@@ -1,6 +1,7 @@
 const TYPE_LABELS = {
   flight: '航班',
   train: '高铁 / 火车',
+  intercity_bus: '城际巴士',
   hotel: '酒店',
   activity: '活动',
   food: '餐饮',
@@ -37,7 +38,9 @@ function presentItem(item) {
     bookingStatusLabel: bookingStatusLabel(item),
     isWaitingToBook: item.bookingStatus === 'waiting_to_book',
     hasRoute: Boolean(item.locationEnd),
-    timeLabel: item.startTime ? `${item.startTime}${item.endTime ? `–${item.endTime}` : ''}` : '当天'
+    timeLabel: item.startTime ? `${item.startTime}${item.endTime ? `–${item.endTime}` : ''}` : '当天',
+    travelClassLabel: item.seatClass || item.cabinClass || item.preferredSeatClass || '',
+    hotelMetaLabel: [item.city, item.roomType, item.checkOutDate ? `退房 ${item.checkOutDate}` : ''].filter(Boolean).join(' · ')
   })
 }
 
@@ -46,4 +49,3 @@ module.exports = {
   presentTrip,
   presentItem
 }
-

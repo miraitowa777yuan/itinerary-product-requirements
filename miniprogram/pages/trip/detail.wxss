@@ -31,6 +31,11 @@
   font-weight: 700;
 }
 
+.heading-actions { display: flex; gap: 12rpx; }
+.import-item { margin: 0; color: #fff; background: #1d4f42; font-size: 24rpx; font-weight: 700; }
+.import-item::after { border: 0; }
+.route-notice { margin: -10rpx 0 24rpx; padding: 18rpx 22rpx; border-radius: 16rpx; color: #6d572f; background: #fff5e4; font-size: 22rpx; }
+
 .add-item::after,
 .ticketed-button::after {
   border: 0;
@@ -144,6 +149,11 @@
   line-height: 1.8;
 }
 
+.route-card { display: flex; gap: 16rpx; margin-top: 22rpx; padding: 18rpx; border-radius: 18rpx; color: #17483c; background: #edf4f0; }
+.route-icon { display: flex; width: 44rpx; height: 44rpx; flex: none; align-items: center; justify-content: center; border-radius: 50%; color: #fff; background: #1d4f42; }
+.route-duration { font-size: 24rpx; font-weight: 700; }
+.route-distance { margin-top: 6rpx; color: #67766f; font-size: 20rpx; line-height: 1.5; }
+
 .ticketed-button {
   margin: 18rpx 0 0;
   color: #7b4c19;
@@ -168,4 +178,3 @@
 .empty-itinerary button {
   margin-top: 30rpx;
 }
-

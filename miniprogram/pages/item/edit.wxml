@@ -12,13 +12,31 @@
 
     <view class="field">
       <text class="field-label">标题 *</text>
-      <input class="field-input" value="{{form.title}}" placeholder="例如：上海虹桥 → 杭州东" data-field="title" bindinput="updateField" />
+      <input class="field-input" value="{{form.title}}" placeholder="例如：银座酒店 / 上海虹桥 → 杭州东" data-field="title" bindinput="updateField" />
     </view>
+
+    <block wx:if="{{form.type === 'hotel'}}">
+      <view class="field">
+        <text class="field-label">酒店城市</text>
+        <input class="field-input" value="{{form.city}}" placeholder="例如：东京" data-field="city" bindinput="updateField" />
+      </view>
+      <view class="field">
+        <text class="field-label">房型</text>
+        <input class="field-input" value="{{form.roomType}}" placeholder="例如：豪华双床房" data-field="roomType" bindinput="updateField" />
+      </view>
+    </block>
 
     <view class="field">
       <text class="field-label">日期 *</text>
       <picker mode="date" value="{{form.date}}" bindchange="updateDate">
         <view class="field-picker">{{form.date || '选择日期'}}</view>
+      </picker>
+    </view>
+
+    <view wx:if="{{form.type === 'hotel'}}" class="field">
+      <text class="field-label">退房日期</text>
+      <picker mode="date" value="{{form.checkOutDate}}" bindchange="updateCheckOutDate">
+        <view class="field-picker">{{form.checkOutDate || '选择日期'}}</view>
       </picker>
     </view>
 
@@ -42,14 +60,24 @@
       <input class="field-input" value="{{form.locationStart}}" placeholder="例如：上海虹桥站" data-field="locationStart" bindinput="updateField" />
     </view>
 
-    <view class="field" wx:if="{{form.type === 'train' || form.type === 'flight' || form.type === 'local_transport'}}">
+    <view class="field" wx:if="{{form.type === 'train' || form.type === 'flight' || form.type === 'intercity_bus' || form.type === 'local_transport'}}">
       <text class="field-label">到达地</text>
       <input class="field-input" value="{{form.locationEnd}}" placeholder="例如：杭州东站" data-field="locationEnd" bindinput="updateField" />
     </view>
 
-    <view class="field" wx:if="{{form.type === 'train' || form.type === 'flight'}}">
-      <text class="field-label">车次 / 航班号</text>
+    <view class="field" wx:if="{{form.type === 'train' || form.type === 'flight' || form.type === 'intercity_bus'}}">
+      <text class="field-label">车次 / 航班号 / 班次</text>
       <input class="field-input" value="{{form.transportNo}}" placeholder="例如：G7331" data-field="transportNo" bindinput="updateField" />
+    </view>
+
+    <view class="field" wx:if="{{form.type === 'flight'}}">
+      <text class="field-label">舱位</text>
+      <input class="field-input" value="{{form.cabinClass}}" placeholder="例如：经济舱 Y" data-field="cabinClass" bindinput="updateField" />
+    </view>
+
+    <view class="field" wx:if="{{form.type === 'train'}}">
+      <text class="field-label">席别</text>
+      <input class="field-input" value="{{form.seatClass}}" placeholder="例如：二等座" data-field="seatClass" bindinput="updateField" />
     </view>
 
     <block wx:if="{{form.type === 'train'}}">
@@ -84,4 +112,3 @@
     <button class="primary-button" bindtap="save">保存</button>
   </view>
 </view>
-

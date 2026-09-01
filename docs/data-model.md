@@ -62,6 +62,7 @@
 - 值机截止、登机口、座位
 - 预订编号、票号（敏感）
 - 航班状态与状态来源
+- cabinClass：订单识别或用户确认的舱位
 
 ### 火车 TrainDetail
 
@@ -82,6 +83,14 @@
 - 房型、入住人
 - 预订平台、确认号（敏感）
 - 入住说明与取消政策摘要
+- city、roomType、checkInDate、checkOutDate：截图识别后由用户确认的结构化字段
+
+### 城际巴士 IntercityBusDetail
+
+- 班次（可为空）
+- 出发站点、目的地站点
+- 出发日期与具体时间，到达时间可为空
+- 订单截图识别结果必须经用户确认后保存
 
 ### 活动与餐饮 ActivityDetail
 
@@ -111,9 +120,18 @@
 - 存储引用、缩略图引用
 - sensitive 标记
 - 上传者、创建时间
-- OCR 状态与结构化提取结果（后续）
+- OCR 状态与结构化提取结果；原始订单截图在识别完成后删除，当前实现不长期保存原图
 
 附件访问必须通过授权校验与短时有效地址，不能将永久公开 URL 写入项目。
+
+## 5.1 RouteLeg
+
+- id、fromItemId、toItemId
+- origin、destination
+- durationMinutes、distanceKm
+- calculatedAt、地图供应商（当前为腾讯地图）
+
+RouteLeg 用于时间线上相邻机场与酒店的驾车衔接，地点字段变化后缓存失效并重新计算。
 
 ## 6. TripMember
 

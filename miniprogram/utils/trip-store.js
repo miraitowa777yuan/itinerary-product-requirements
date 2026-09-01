@@ -129,6 +129,15 @@ function updateBookingStatus(tripId, itemId, bookingStatus) {
   return true
 }
 
+function saveRouteLegs(tripId, routeLegs) {
+  const trips = getTrips()
+  const trip = trips.find((current) => current.id === tripId)
+  if (!trip) return false
+  trip.routeLegs = Array.isArray(routeLegs) ? routeLegs : []
+  saveTrips(trips)
+  return true
+}
+
 function deleteItem(tripId, itemId) {
   const trips = getTrips()
   const trip = trips.find((current) => current.id === tripId)
@@ -145,5 +154,6 @@ module.exports = {
   saveTrip,
   saveItem,
   updateBookingStatus,
+  saveRouteLegs,
   deleteItem
 }

@@ -3,6 +3,7 @@
   "compileType": "miniprogram",
   "libVersion": "trial",
   "miniprogramRoot": "miniprogram/",
+  "cloudfunctionRoot": "cloudfunctions/",
   "projectname": "itinerary-product",
   "description": "跨端旅行行程管理小程序",
   "setting": {

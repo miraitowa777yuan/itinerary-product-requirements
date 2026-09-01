@@ -3,7 +3,8 @@
     "pages/trips/index",
     "pages/trip/detail",
     "pages/trip/edit",
-    "pages/item/edit"
+    "pages/item/edit",
+    "pages/import/order"
   ],
   "window": {
     "navigationBarBackgroundColor": "#F6F5F1",
@@ -15,4 +16,3 @@
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 }
-

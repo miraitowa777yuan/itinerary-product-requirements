@@ -4,6 +4,7 @@ const types = [
   { value: 'train', label: '高铁 / 火车' },
   { value: 'flight', label: '航班' },
   { value: 'hotel', label: '酒店' },
+  { value: 'intercity_bus', label: '城际巴士' },
   { value: 'activity', label: '活动' },
   { value: 'food', label: '餐饮' },
   { value: 'local_transport', label: '当地交通' },
@@ -25,6 +26,11 @@ Page({
       locationStart: '',
       locationEnd: '',
       transportNo: '',
+      city: '',
+      roomType: '',
+      checkOutDate: '',
+      cabinClass: '',
+      seatClass: '',
       bookingStatus: 'waiting_to_book',
       expectedSaleAt: '',
       preferredSeatClass: '',
@@ -72,6 +78,10 @@ Page({
 
   updateEndTime(event) {
     this.setData({ 'form.endTime': event.detail.value })
+  },
+
+  updateCheckOutDate(event) {
+    this.setData({ 'form.checkOutDate': event.detail.value })
   },
 
   updateBookingStatus(event) {
