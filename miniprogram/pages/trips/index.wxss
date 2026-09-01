@@ -10,7 +10,7 @@
 
 .create-button {
   display: flex;
-  width: 84rpx;
+  width: 72rpx;
   min-width: 0;
   height: 64rpx;
   box-sizing: border-box;
