@@ -35,6 +35,16 @@ const past = tripStore.saveTrip({
 })
 assert.strictEqual(tripStore.isPastTrip(past), true)
 assert.strictEqual(tripStore.getTrips({ includePast: false }).some(item => item.id === past.id), false)
+
+const orderedTrip = tripStore.saveTrip({
+  title: '打车排序测试', destination: '杭州', startDate: '2099-02-01', endDate: '2099-02-01'
+})
+tripStore.saveItem(orderedTrip.id, { id: 'train-item', type: 'train', title: '车站', date: '2099-02-01', startTime: '08:00' })
+tripStore.saveItem(orderedTrip.id, { id: 'flight-item', type: 'flight', title: '机场', date: '2099-02-01', startTime: '12:00' })
+tripStore.saveItem(orderedTrip.id, {
+  id: 'taxi-item', type: 'taxi', title: '车站 → 机场', date: '2099-02-01', durationMinutes: '35', afterItemId: 'train-item'
+})
+assert.deepStrictEqual(tripStore.getTrip(orderedTrip.id).items.map(item => item.id), ['train-item', 'taxi-item', 'flight-item'])
 assert.strictEqual(tripStore.deleteTrip(created.id), true)
 
 console.log('trip store tests passed')

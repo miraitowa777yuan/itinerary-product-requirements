@@ -112,7 +112,9 @@ function presentItem(item) {
     bookingStatusLabel: bookingStatusLabel(item),
     isWaitingToBook: item.bookingStatus === 'waiting_to_book',
     hasRoute: Boolean(item.locationEnd),
-    timeLabel: item.startTime ? `${item.startTime}${item.endTime ? `–${item.endTime}` : ''}` : '当天',
+    timeLabel: item.type === 'taxi'
+      ? '车程'
+      : (item.startTime ? `${item.startTime}${item.endTime ? `–${item.endTime}` : ''}` : '当天'),
     travelClassLabel: item.seatClass || item.cabinClass || item.preferredSeatClass || '',
     hotelMetaLabel: [item.city, item.roomType, item.checkOutDate ? `退房 ${item.checkOutDate}` : ''].filter(Boolean).join(' · '),
     priceValue,

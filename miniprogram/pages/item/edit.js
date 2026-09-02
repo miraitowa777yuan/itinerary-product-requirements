@@ -20,7 +20,7 @@ function emptyForm() {
     locationStart: '', locationEnd: '', locationStartCity: '', locationEndCity: '',
     departureTerminal: '', arrivalTerminal: '', transportNo: '', airlineName: '',
     city: '', roomType: '', checkOutDate: '', cabinClass: '', seatClass: '',
-    price: '', currency: 'CNY', durationMinutes: '',
+    price: '', currency: 'CNY', durationMinutes: '', afterItemId: '',
     driveToNextMinutes: '', bookingStatus: 'waiting_to_book', expectedSaleAt: '',
     preferredSeatClass: '', notes: '', source: 'manual'
   }
@@ -48,14 +48,6 @@ function normalizeDuration(value) {
   const minutes = Number(raw)
   if (!Number.isFinite(minutes) || minutes <= 0 || minutes > 1440) return null
   return String(Math.round(minutes))
-}
-
-function addMinutesToTime(time, minutes) {
-  const match = String(time || '').match(/^(\d{1,2}):(\d{2})$/)
-  if (!match) return ''
-  const total = Number(match[1]) * 60 + Number(match[2]) + Number(minutes || 0)
-  const normalized = ((total % 1440) + 1440) % 1440
-  return `${String(Math.floor(normalized / 60)).padStart(2, '0')}:${String(normalized % 60).padStart(2, '0')}`
 }
 
 Page({
@@ -93,7 +85,7 @@ Page({
         type: 'taxi',
         title: [fromLabel, toLabel].filter(Boolean).join(' → '),
         date: (fromItem && fromItem.date) || (toItem && toItem.date) || '',
-        startTime: (fromItem && (fromItem.endTime || fromItem.startTime)) || '',
+        afterItemId: options.fromId || '',
         locationStart: fromLabel,
         locationEnd: toLabel,
         bookingStatus: 'confirmed',
@@ -487,9 +479,11 @@ Page({
         return
       }
       form.durationMinutes = durationMinutes
-      if (form.startTime && !form.endTime) form.endTime = addMinutesToTime(form.startTime, durationMinutes)
+      form.startTime = ''
+      form.endTime = ''
     } else {
       form.durationMinutes = ''
+      form.afterItemId = ''
     }
     if (form.driveToNextMinutes !== '') {
       const minutes = Number(form.driveToNextMinutes)

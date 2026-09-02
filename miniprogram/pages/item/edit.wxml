@@ -60,7 +60,7 @@
       </picker>
     </view>
 
-    <view class="time-fields">
+    <view wx:if="{{form.type !== 'taxi'}}" class="time-fields">
       <view class="field time-field">
         <text class="field-label">开始时间</text>
         <picker mode="time" value="{{form.startTime}}" bindchange="updateStartTime">
@@ -78,7 +78,7 @@
     <view wx:if="{{form.type === 'taxi'}}" class="field">
       <text class="field-label">车程时长（分钟） *</text>
       <input class="field-input" type="number" value="{{form.durationMinutes}}" placeholder="例如：35" placeholder-class="field-placeholder" data-field="durationMinutes" bindinput="updateField" />
-      <view class="field-help">填写预计打车耗时；如果已填写出发时间且未填写结束时间，会自动计算结束时间。</view>
+      <view class="field-help">填写预计打车耗时，打车行程只记录日期和时长，不单独记录开始 / 结束时间。</view>
     </view>
 
     <view class="field">

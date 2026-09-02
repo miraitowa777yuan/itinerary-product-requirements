@@ -121,6 +121,33 @@ function makeId(prefix) {
   return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 10000)}`
 }
 
+function sortItems(items) {
+  const sorted = items.slice().sort((a, b) => {
+    const left = `${a.date || ''} ${a.startTime || ''}`
+    const right = `${b.date || ''} ${b.startTime || ''}`
+    const byTime = left.localeCompare(right)
+    if (byTime !== 0) return byTime
+    return String(a.id || '').localeCompare(String(b.id || ''))
+  })
+  // A shortcut-created taxi has no clock time by design. Keep it directly
+  // after the itinerary item it connects, even when its date is the same.
+  for (let pass = 0; pass < sorted.length; pass += 1) {
+    let moved = false
+    sorted.slice().forEach(item => {
+      if (!item.afterItemId) return
+      const currentIndex = sorted.findIndex(current => current.id === item.id)
+      const anchorIndex = sorted.findIndex(current => current.id === item.afterItemId)
+      if (currentIndex < 0 || anchorIndex < 0 || currentIndex === anchorIndex + 1) return
+      sorted.splice(currentIndex, 1)
+      const nextAnchorIndex = sorted.findIndex(current => current.id === item.afterItemId)
+      sorted.splice(nextAnchorIndex + 1, 0, item)
+      moved = true
+    })
+    if (!moved) break
+  }
+  return sorted
+}
+
 function saveTrip(input) {
   const trips = readTrips()
   const trip = Object.assign({
@@ -158,7 +185,7 @@ function saveItem(tripId, input) {
   } else {
     trips[tripIndex].items.push(item)
   }
-  trips[tripIndex].items.sort((a, b) => `${a.date} ${a.startTime}`.localeCompare(`${b.date} ${b.startTime}`))
+  trips[tripIndex].items = sortItems(trips[tripIndex].items)
   saveTrips(trips)
   return clone(item)
 }
