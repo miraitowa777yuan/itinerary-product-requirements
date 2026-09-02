@@ -272,6 +272,10 @@
   min-height: 210rpx;
 }
 
+.timeline-row--taxi {
+  min-height: 156rpx;
+}
+
 .timeline-content {
   min-width: 0;
 }
@@ -308,6 +312,51 @@
   background: #1d4f42;
 }
 
+.timeline-dot--flight {
+  border-color: #d9e9ee;
+  background: #3d7185;
+}
+
+.timeline-dot--train {
+  border-color: #e0e4f2;
+  background: #5f6fa5;
+}
+
+.timeline-dot--hotel {
+  border-color: #f1e1d9;
+  background: #c47756;
+}
+
+.timeline-dot--taxi {
+  border-color: #f2e5cb;
+  background: #c28a3c;
+}
+
+.timeline-dot--intercity_bus {
+  border-color: #e8e0f1;
+  background: #8267a7;
+}
+
+.timeline-dot--activity {
+  border-color: #f0dfdb;
+  background: #c57562;
+}
+
+.timeline-dot--food {
+  border-color: #f1e7d3;
+  background: #b8873e;
+}
+
+.timeline-dot--local_transport {
+  border-color: #d9ebe8;
+  background: #4a8f8a;
+}
+
+.timeline-dot--custom {
+  border-color: #e2e7e8;
+  background: #75848a;
+}
+
 .timeline-dot--waiting {
   border-color: #f5dfbc;
   background: #b56a1b;
@@ -325,9 +374,48 @@
 .item-card {
   margin: 0 0 24rpx 16rpx;
   padding: 28rpx;
+  border-left: 8rpx solid #dce9e3;
   border-radius: 26rpx;
   background: #fff;
   box-shadow: 0 10rpx 34rpx rgba(32, 37, 34, 0.05);
+}
+
+.item-card--flight {
+  border-left-color: #3d7185;
+}
+
+.item-card--train {
+  border-left-color: #5f6fa5;
+}
+
+.item-card--hotel {
+  border-left-color: #c47756;
+}
+
+.item-card--taxi {
+  margin-bottom: 14rpx;
+  padding: 18rpx 24rpx;
+  border-left-color: #c28a3c;
+}
+
+.item-card--intercity_bus {
+  border-left-color: #8267a7;
+}
+
+.item-card--activity {
+  border-left-color: #c57562;
+}
+
+.item-card--food {
+  border-left-color: #b8873e;
+}
+
+.item-card--local_transport {
+  border-left-color: #4a8f8a;
+}
+
+.item-card--custom {
+  border-left-color: #75848a;
 }
 
 .item-topline {
@@ -337,8 +425,57 @@
 }
 
 .item-type {
+  display: inline-flex;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
   color: #68716c;
+  background: #eef2ef;
   font-size: 22rpx;
+}
+
+.item-type--flight {
+  color: #3d7185;
+  background: #e9f2f4;
+}
+
+.item-type--train {
+  color: #5f6fa5;
+  background: #eef0f8;
+}
+
+.item-type--hotel {
+  color: #ad6548;
+  background: #faeee9;
+}
+
+.item-type--taxi {
+  color: #a66f20;
+  background: #fbf2df;
+}
+
+.item-type--intercity_bus {
+  color: #76569d;
+  background: #f2ecf7;
+}
+
+.item-type--activity {
+  color: #a96354;
+  background: #faeeeb;
+}
+
+.item-type--food {
+  color: #986f2b;
+  background: #faf3e5;
+}
+
+.item-type--local_transport {
+  color: #3d7d79;
+  background: #e9f4f2;
+}
+
+.item-type--custom {
+  color: #65747b;
+  background: #eef1f2;
 }
 
 .status-pill {
@@ -361,6 +498,12 @@
   font-weight: 700;
 }
 
+.item-card--taxi .item-title {
+  margin-top: 12rpx;
+  font-size: 27rpx;
+  line-height: 1.35;
+}
+
 .item-price {
   margin-top: 14rpx;
   color: #a64f1c;
@@ -368,11 +511,23 @@
   font-weight: 700;
 }
 
+.item-card--taxi .item-price {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+}
+
 .item-route,
 .item-detail {
   margin-top: 10rpx;
   color: #67706b;
   font-size: 24rpx;
+}
+
+.item-card--taxi .item-route,
+.item-card--taxi .item-detail {
+  margin-top: 6rpx;
+  font-size: 21rpx;
+  line-height: 1.4;
 }
 
 .item-airline {

@@ -22,12 +22,12 @@ const COST_GROUPS = {
 }
 
 const COST_COLORS = {
-  flight: '#1D4F42',
-  hotel: '#D9824B',
-  train: '#5575A8',
-  taxi: '#C08A39',
-  intercity_bus: '#8668A9',
-  other: '#92A99C'
+  flight: '#3D7185',
+  hotel: '#C47756',
+  train: '#5F6FA5',
+  taxi: '#C28A3C',
+  intercity_bus: '#8267A7',
+  other: '#82928A'
 }
 
 function parsePrice(value) {

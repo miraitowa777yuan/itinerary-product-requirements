@@ -60,19 +60,19 @@
   </view>
 
   <view wx:if="{{items.length}}" class="timeline">
-    <view wx:for="{{items}}" wx:key="id" class="timeline-row">
+    <view wx:for="{{items}}" wx:key="id" class="timeline-row timeline-row--{{item.type}}">
       <view class="time-column">
         <view class="item-date">{{item.date}}</view>
         <view class="item-time">{{item.timeLabel}}</view>
       </view>
       <view class="timeline-track">
-        <view class="timeline-dot {{item.isWaitingToBook ? 'timeline-dot--waiting' : ''}}"></view>
+        <view class="timeline-dot timeline-dot--{{item.type}} {{item.isWaitingToBook ? 'timeline-dot--waiting' : ''}}"></view>
         <view class="timeline-line"></view>
       </view>
       <view class="timeline-content">
-        <view class="item-card" data-id="{{item.id}}" bindtap="editItem">
+        <view class="item-card item-card--{{item.type}}" data-id="{{item.id}}" bindtap="editItem">
           <view class="item-topline">
-            <text class="item-type">{{item.typeLabel}}</text>
+            <text class="item-type item-type--{{item.type}}">{{item.typeLabel}}</text>
             <text class="status-pill {{item.isWaitingToBook ? 'status-pill--waiting' : ''}}">{{item.bookingStatusLabel}}</text>
           </view>
           <view class="item-title">{{item.title}}</view>
