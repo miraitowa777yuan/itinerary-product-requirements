@@ -65,6 +65,28 @@
   line-height: 64rpx;
 }
 
+.expense-actions {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.aa-button {
+  display: inline-block;
+  margin: 20rpx 0 0;
+  padding: 0 22rpx;
+  border-radius: 999rpx;
+  color: #fff;
+  background: #b56a1b;
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 64rpx;
+}
+
+.aa-button::after {
+  border: 0;
+}
+
 .expense-toggle::after {
   border: 0;
 }
@@ -73,6 +95,67 @@
   margin-top: 20rpx;
   padding-top: 8rpx;
   border-top: 2rpx solid rgba(185, 208, 196, 0.7);
+}
+
+.expense-chart-wrap {
+  display: flex;
+  align-items: center;
+  gap: 22rpx;
+  padding: 8rpx 0 22rpx;
+}
+
+.expense-ring {
+  width: 210rpx;
+  height: 210rpx;
+  flex: none;
+}
+
+.expense-legend {
+  min-width: 0;
+  flex: 1;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10rpx;
+  padding: 8rpx 0;
+}
+
+.legend-name-wrap {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.legend-dot {
+  width: 14rpx;
+  height: 14rpx;
+  flex: none;
+  margin-right: 10rpx;
+  border-radius: 50%;
+}
+
+.legend-name {
+  overflow: hidden;
+  color: #29352f;
+  font-size: 22rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legend-percent {
+  margin-left: 8rpx;
+  color: #78857e;
+  font-size: 19rpx;
+}
+
+.legend-amount {
+  flex: none;
+  color: #17483c;
+  font-size: 22rpx;
+  font-weight: 700;
 }
 
 .expense-row {
@@ -104,6 +187,57 @@
   padding: 14rpx 0 4rpx;
   color: #78857e;
   font-size: 22rpx;
+}
+
+.aa-share-panel {
+  margin-top: 22rpx;
+  padding: 20rpx;
+  border: 2rpx solid #ead7b9;
+  border-radius: 20rpx;
+  background: #fff8eb;
+}
+
+.aa-share-title {
+  color: #8b5115;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.aa-share-friends {
+  margin-top: 8rpx;
+  color: #866c4b;
+  font-size: 21rpx;
+}
+
+.aa-share-total-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-top: 18rpx;
+  padding-top: 16rpx;
+  border-top: 2rpx solid #f0dfc2;
+}
+
+.aa-share-label {
+  display: block;
+  color: #5f482e;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
+.aa-share-help {
+  display: block;
+  margin-top: 4rpx;
+  color: #9b8668;
+  font-size: 19rpx;
+}
+
+.aa-share-total {
+  flex: none;
+  color: #a64f1c;
+  font-size: 27rpx;
+  font-weight: 700;
 }
 
 .section-heading {
@@ -311,4 +445,123 @@
 
 .empty-itinerary button {
   margin-top: 30rpx;
+}
+
+.aa-mask {
+  position: fixed;
+  z-index: 20;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(26, 34, 30, 0.42);
+}
+
+.aa-sheet {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 18rpx 32rpx 34rpx;
+  border-radius: 30rpx 30rpx 0 0;
+  background: #fff;
+}
+
+.aa-sheet-handle {
+  width: 72rpx;
+  height: 8rpx;
+  margin: 0 auto 20rpx;
+  border-radius: 999rpx;
+  background: #d6ddd8;
+}
+
+.aa-sheet-title {
+  color: #202522;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.aa-sheet-help {
+  margin-top: 8rpx;
+  color: #78857e;
+  font-size: 21rpx;
+  line-height: 1.5;
+}
+
+.aa-friend-list {
+  max-height: 420rpx;
+  margin-top: 20rpx;
+  overflow: auto;
+}
+
+.aa-friend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 86rpx;
+  border-bottom: 2rpx solid #f0f1ee;
+}
+
+.aa-friend-identity {
+  display: flex;
+  align-items: center;
+}
+
+.aa-friend-avatar {
+  display: flex;
+  width: 52rpx;
+  height: 52rpx;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18rpx;
+  color: #fff;
+  background: #8b6b4a;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
+.aa-friend-name {
+  margin-left: 14rpx;
+  color: #29352f;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.aa-check {
+  display: flex;
+  width: 44rpx;
+  height: 44rpx;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid #c7d2cc;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 27rpx;
+}
+
+.aa-check--selected {
+  border-color: #1d4f42;
+  background: #1d4f42;
+}
+
+.aa-confirm-button,
+.aa-cancel-button {
+  margin: 18rpx 0 0;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+
+.aa-confirm-button {
+  color: #fff;
+  background: #1d4f42;
+}
+
+.aa-cancel-button {
+  color: #66736c;
+  background: #edf1ed;
+}
+
+.aa-confirm-button::after,
+.aa-cancel-button::after {
+  border: 0;
 }

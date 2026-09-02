@@ -13,6 +13,54 @@
     </view>
   </view>
 
+  <view class="profile-section-heading">
+    <view>
+      <view class="profile-section-title profile-section-title--inline">好友与共享</view>
+      <view class="profile-section-help">添加好友后，可在旅行详情里一键共享行程和 AA 账单。</view>
+    </view>
+    <button class="add-friend-button" bindtap="startAddFriend">添加好友</button>
+  </view>
+
+  <view wx:if="{{showAddFriend}}" class="friend-form-card">
+    <view class="friend-form-title">添加一位好友</view>
+    <input class="friend-input" value="{{newFriendName}}" placeholder="好友昵称" placeholder-class="friend-placeholder" data-field="newFriendName" bindinput="updateFriendField" />
+    <input class="friend-input" value="{{newFriendNote}}" placeholder="备注（可选，例如：同行人）" placeholder-class="friend-placeholder" data-field="newFriendNote" bindinput="updateFriendField" />
+    <view class="friend-form-actions">
+      <button class="friend-cancel-button" bindtap="cancelAddFriend">取消</button>
+      <button class="friend-save-button" bindtap="saveFriend">保存好友</button>
+    </view>
+  </view>
+
+  <view wx:if="{{friends.length}}" class="friends-card">
+    <view wx:for="{{friends}}" wx:key="id" class="friend-row">
+      <view class="friend-identity">
+        <view class="friend-avatar">{{item.avatarText}}</view>
+        <view>
+          <view class="friend-name">{{item.name}}</view>
+          <view class="friend-note">{{item.note || '可共享旅行与 AA 账单'}}</view>
+        </view>
+      </view>
+      <view class="friend-row-right">
+        <text wx:if="{{item.sharedCount}}" class="friend-shared-count">已共享 {{item.sharedCount}} 次</text>
+        <text class="friend-remove" role="button" data-id="{{item.id}}" bindtap="removeFriend">移除</text>
+      </view>
+    </view>
+  </view>
+  <view wx:else class="friends-empty">还没有好友。添加后即可在旅行详情中选择 AA 对象。</view>
+
+  <view wx:if="{{sharedTrips.length}}" class="shared-section">
+    <view class="profile-section-title">最近共享</view>
+    <view class="shared-card">
+      <view wx:for="{{sharedTrips}}" wx:key="id" class="shared-row" data-id="{{item.tripId}}" bindtap="openSharedTrip">
+        <view>
+          <view class="shared-trip-title">{{item.tripTitle || '未命名旅行'}}</view>
+          <view class="shared-friend-label">{{item.itineraryLabel}} · 已共享给 {{item.friendNames}}</view>
+        </view>
+        <view class="shared-total">{{item.totalLabel || '¥0.00'}}</view>
+      </view>
+    </view>
+  </view>
+
   <view class="profile-section-title">个人设置</view>
   <view class="settings-card">
     <view class="setting-row">

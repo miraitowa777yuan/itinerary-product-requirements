@@ -21,6 +21,15 @@ const COST_GROUPS = {
   other: { key: 'other', label: '其他' }
 }
 
+const COST_COLORS = {
+  flight: '#1D4F42',
+  hotel: '#D9824B',
+  train: '#5575A8',
+  taxi: '#C08A39',
+  intercity_bus: '#8668A9',
+  other: '#92A99C'
+}
+
 function parsePrice(value) {
   const raw = String(value == null ? '' : value).trim().replace(/[¥￥元人民币,\s]/g, '')
   if (!raw) return null
@@ -59,7 +68,10 @@ function summarizeTripCosts(trip) {
     .filter(Boolean)
     .map(group => Object.assign({}, group, {
       amountLabel: formatPrice(group.amount),
-      countLabel: `${group.count} 项`
+      countLabel: `${group.count} 项`,
+      color: COST_COLORS[group.key] || COST_COLORS.other,
+      percent: total > 0 ? group.amount / total : 0,
+      percentLabel: total > 0 ? `${(group.amount / total * 100).toFixed(1)}%` : '0%'
     }))
   return {
     total,

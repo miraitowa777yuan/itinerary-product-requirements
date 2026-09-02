@@ -17,13 +17,37 @@
       <text wx:if="{{expenseSummary.hasCosts}}">已记录 {{expenseSummary.pricedItemCount}} 项价格</text>
       <text wx:else>识别截图会自动带入价格，也可在编辑行程中手动调整</text>
     </view>
-    <button class="expense-toggle" bindtap="toggleExpenseDetails">{{showExpenseDetails ? '收起明细' : '查看明细'}}</button>
+    <view class="expense-actions">
+      <button class="expense-toggle" bindtap="toggleExpenseDetails">{{showExpenseDetails ? '收起明细' : '查看明细'}}</button>
+      <button class="aa-button" bindtap="startAaShare">一键 AA</button>
+    </view>
     <view wx:if="{{showExpenseDetails}}" class="expense-breakdown">
+      <view wx:if="{{expenseSummary.hasCosts}}" class="expense-chart-wrap">
+        <canvas type="2d" canvas-id="expense-ring" id="expense-ring" class="expense-ring"></canvas>
+        <view class="expense-legend">
+          <view wx:for="{{expenseSummary.breakdown}}" wx:key="key" class="legend-row">
+            <view class="legend-name-wrap">
+              <view class="legend-dot" style="background-color: {{item.color}};"></view>
+              <text class="legend-name">{{item.label}}</text>
+              <text class="legend-percent">{{item.percentLabel}}</text>
+            </view>
+            <text class="legend-amount">{{item.amountLabel}}</text>
+          </view>
+        </view>
+      </view>
       <view wx:for="{{expenseSummary.breakdown}}" wx:key="key" class="expense-row">
         <view><text class="expense-row-label">{{item.label}}</text><text class="expense-row-count">{{item.countLabel}}</text></view>
         <text class="expense-row-amount">{{item.amountLabel}}</text>
       </view>
       <view wx:if="{{!expenseSummary.breakdown.length}}" class="expense-empty">还没有已填写价格的行程。</view>
+    </view>
+    <view wx:if="{{aaShare}}" class="aa-share-panel">
+      <view class="aa-share-title">行程与 AA 账单已共享</view>
+      <view class="aa-share-friends">共享给：{{aaShare.friendNames}}</view>
+      <view class="aa-share-total-row">
+        <view><text class="aa-share-label">{{aaShare.peopleCount}} 人均摊</text><text class="aa-share-help">含你和已选择好友</text></view>
+        <text class="aa-share-total">每人 {{aaShare.perPersonLabel}}</text>
+      </view>
     </view>
   </view>
 
@@ -86,5 +110,24 @@
     <view class="empty-title">行程还是空的</view>
     <view class="muted">先加入一段交通或一家酒店。</view>
     <button class="primary-button" bindtap="addItem">添加第一项</button>
+  </view>
+
+  <view wx:if="{{showAaPicker}}" class="aa-mask" catchtap="closeAaPicker">
+    <view class="aa-sheet" catchtap="stopAaPicker">
+      <view class="aa-sheet-handle"></view>
+      <view class="aa-sheet-title">选择 AA 好友</view>
+      <view class="aa-sheet-help">选择后将共享本次旅行行程、分类账单和均摊金额。</view>
+      <view class="aa-friend-list">
+        <view wx:for="{{friends}}" wx:key="id" class="aa-friend-row" data-id="{{item.id}}" bindtap="toggleAaFriend">
+          <view class="aa-friend-identity">
+            <view class="aa-friend-avatar">{{item.avatarText}}</view>
+            <text class="aa-friend-name">{{item.name}}</text>
+          </view>
+          <view class="aa-check {{item.selected ? 'aa-check--selected' : ''}}">{{item.selected ? '✓' : ''}}</view>
+        </view>
+      </view>
+      <button class="aa-confirm-button" bindtap="confirmAaShare">共享账单</button>
+      <button class="aa-cancel-button" bindtap="closeAaPicker">取消</button>
+    </view>
   </view>
 </view>

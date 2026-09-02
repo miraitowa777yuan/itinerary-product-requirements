@@ -147,7 +147,20 @@
 - sensitiveAccess：允许访问的敏感字段范围
 - invitedBy、joinedAt、revokedAt
 
-## 7. Reminder
+## 7. Friend
+
+- id、ownerId、name、note、createdAt
+- 好友关系用于选择共享对象；正式版本应由账号 / unionId 建立，不以昵称作为唯一身份
+
+## 8. TripShare
+
+- id、tripId、ownerId、friendIds
+- sharedScope：itinerary_and_expense
+- total、breakdown、perPersonAmount：共享时保存的账单快照与均摊信息
+- itinerary：仅包含已授权的行程摘要，不应默认包含订单号、证件号等敏感字段
+- sharedAt、revokedAt
+
+## 9. Reminder
 
 - id、tripId、itemId、userId
 - triggerAt 或相对提前量
@@ -157,7 +170,7 @@
 
 提醒为用户级配置，不应因为一名成员设置而打扰所有同行者。
 
-## 8. ChangeEvent
+## 10. ChangeEvent
 
 - id、tripId、entityType、entityId
 - actorId、operation
@@ -166,7 +179,7 @@
 
 不在普通变更日志中复制保存证件号、完整订单号等敏感原值。
 
-## 9. SyncOperation
+## 11. SyncOperation
 
 - operationId：客户端生成的幂等键
 - entityType / entityId
@@ -175,7 +188,7 @@
 - clientTimestamp / serverTimestamp
 - status / conflictDetail
 
-## 10. 关键关系与约束
+## 12. 关键关系与约束
 
 - 一个旅行有且只有一个所有者，可以有多个成员。
 - 一个项目属于一段旅行，可关联多个附件和提醒。
