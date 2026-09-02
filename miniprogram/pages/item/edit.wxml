@@ -87,6 +87,18 @@
       <view class="field-help">截图识别会自动带入价格，也可以在这里手动调整。</view>
     </view>
 
+    <view class="field participants-field">
+      <view class="field-label-row"><text class="field-label">参与人 *</text><text class="field-label-hint">用于 AA 分摊</text></view>
+      <view class="participant-list">
+        <view wx:for="{{participantOptions}}" wx:key="id" class="participant-chip {{item.selected ? 'participant-chip--selected' : ''}}" role="button" data-id="{{item.id}}" bindtap="toggleParticipant">
+          <view class="participant-avatar">{{item.avatarText}}</view>
+          <text class="participant-name">{{item.name}}</text>
+          <text wx:if="{{item.selected}}" class="participant-check">✓</text>
+        </view>
+      </view>
+      <view class="field-help">每项行程可以单独选择参与人；未选择的人不会分摊这一项费用。</view>
+    </view>
+
     <block wx:if="{{form.type === 'flight' || form.type === 'train'}}">
       <view class="field hub-field">
         <text class="field-label">出发城市与{{form.type === 'flight' ? '机场' : '车站'}}</text>

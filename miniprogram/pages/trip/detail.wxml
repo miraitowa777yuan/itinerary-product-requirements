@@ -45,8 +45,24 @@
       <view class="aa-share-title">行程与 AA 账单已共享</view>
       <view class="aa-share-friends">共享给：{{aaShare.friendNames}}</view>
       <view class="aa-share-total-row">
-        <view><text class="aa-share-label">{{aaShare.peopleCount}} 人均摊</text><text class="aa-share-help">含你和已选择好友</text></view>
-        <text class="aa-share-total">每人 {{aaShare.perPersonLabel}}</text>
+        <view><text class="aa-share-label">{{aaShare.splitModeLabel}}</text><text class="aa-share-help">共 {{aaShare.peopleCount}} 人 · 总计 {{aaShare.totalLabel}}</text></view>
+        <text class="aa-share-total">按参与项分摊</text>
+      </view>
+      <view wx:if="{{aaShare.participantAmounts.length}}" class="aa-participant-list">
+        <view wx:for="{{aaShare.participantAmounts}}" wx:key="id" class="aa-participant-row">
+          <text class="aa-participant-name">{{item.name}}</text>
+          <text class="aa-participant-amount">{{item.amountLabel}}</text>
+        </view>
+      </view>
+      <view wx:if="{{aaShare.itemRows.length}}" class="aa-split-list">
+        <view class="aa-split-heading">按项目拆分</view>
+        <view wx:for="{{aaShare.itemRows}}" wx:key="id" class="aa-split-row">
+          <view class="aa-split-copy">
+            <view class="aa-split-item-title">{{item.typeLabel}} · {{item.title}}</view>
+            <view class="aa-split-participants">{{item.participantAmountsLabel || item.participantLabel}}</view>
+          </view>
+          <text class="aa-split-amount">{{item.amountLabel}}</text>
+        </view>
       </view>
     </view>
   </view>

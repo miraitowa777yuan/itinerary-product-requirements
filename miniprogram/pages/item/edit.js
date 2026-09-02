@@ -1,6 +1,9 @@
 const tripStore = require('../../utils/trip-store')
+const socialStore = require('../../utils/social-store')
 const { getHubSuggestions, airlineFromFlightNo } = require('../../utils/transport-data')
 const { FLIGHT_CLASSES, TRAIN_CLASSES, parseOrderText } = require('../../utils/order-parser')
+
+const SELF_PARTICIPANT_ID = 'self'
 
 const types = [
   { value: 'train', label: '高铁 / 火车' },
@@ -22,8 +25,19 @@ function emptyForm() {
     city: '', roomType: '', checkOutDate: '', cabinClass: '', seatClass: '',
     price: '', currency: 'CNY', durationMinutes: '', afterItemId: '',
     driveToNextMinutes: '', bookingStatus: 'waiting_to_book', expectedSaleAt: '',
-    preferredSeatClass: '', notes: '', source: 'manual'
+    preferredSeatClass: '', participantIds: [], notes: '', source: 'manual'
   }
+}
+
+function buildParticipantOptions(form, friends) {
+  const options = [{ id: SELF_PARTICIPANT_ID, name: '我', avatarText: '我' }].concat(
+    (friends || []).map(friend => ({ id: friend.id, name: friend.name, avatarText: friend.avatarText }))
+  )
+  const existingIds = Array.isArray(form && form.participantIds) && form.participantIds.length
+    ? form.participantIds
+    : options.map(option => option.id)
+  const selected = new Set(existingIds)
+  return options.map(option => Object.assign({}, option, { selected: selected.has(option.id) }))
 }
 
 function transferEndpoint(item, side) {
@@ -56,7 +70,7 @@ Page({
     flightClasses: FLIGHT_CLASSES, trainClasses: TRAIN_CLASSES,
     cabinClassIndex: 0, seatClassIndex: 0, preferredSeatClassIndex: 0,
     startSuggestions: [], endSuggestions: [], screenshotPath: '',
-    ocrStatus: 'idle', ocrMessage: '', recognizedText: '', form: emptyForm()
+    ocrStatus: 'idle', ocrMessage: '', recognizedText: '', form: emptyForm(), participantOptions: []
   },
 
   onLoad(options) {
@@ -95,6 +109,7 @@ Page({
       nextData.form = form
       nextData.typeIndex = Math.max(0, types.findIndex(type => type.value === 'taxi'))
     }
+    nextData.participantOptions = buildParticipantOptions(nextData.form || emptyForm(), socialStore.getFriends())
     this.setData(nextData)
     wx.setNavigationBarTitle({ title: itemId ? '编辑行程' : '添加行程' })
   },
@@ -110,6 +125,22 @@ Page({
 
   updateField(event) {
     this.setData({ [`form.${event.currentTarget.dataset.field}`]: event.detail.value })
+  },
+
+  toggleParticipant(event) {
+    const participantId = event.currentTarget.dataset.id
+    const selectedCount = this.data.participantOptions.filter(option => option.selected).length
+    const target = this.data.participantOptions.find(option => option.id === participantId)
+    if (!target) return
+    if (target.selected && selectedCount <= 1) {
+      wx.showToast({ title: '至少选择一位参与人', icon: 'none' })
+      return
+    }
+    this.setData({
+      participantOptions: this.data.participantOptions.map(option => option.id === participantId
+        ? Object.assign({}, option, { selected: !option.selected })
+        : option)
+    })
   },
 
   updateTransportNo(event) {
@@ -465,6 +496,12 @@ Page({
       form.locationStart = ''; form.locationEnd = ''
       form.locationStartCity = ''; form.locationEndCity = ''
     }
+    const participantIds = this.data.participantOptions.filter(option => option.selected).map(option => option.id)
+    if (!participantIds.length) {
+      wx.showToast({ title: '请至少选择一位参与人', icon: 'none' })
+      return
+    }
+    form.participantIds = participantIds
     const price = normalizePrice(form.price)
     if (price === null) {
       wx.showToast({ title: '价格请填写非负数字，最多两位小数', icon: 'none' })

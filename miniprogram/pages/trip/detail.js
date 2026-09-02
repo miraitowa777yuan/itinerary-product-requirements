@@ -1,6 +1,14 @@
 const tripStore = require('../../utils/trip-store')
 const socialStore = require('../../utils/social-store')
-const { presentTrip, presentItem, summarizeTripCosts, formatPrice } = require('../../utils/presenters')
+const {
+  presentTrip,
+  presentItem,
+  summarizeTripCosts,
+  summarizeTripSplit,
+  participantIdsForItem,
+  formatPrice,
+  parsePrice
+} = require('../../utils/presenters')
 
 function transferEndpoint(item, side) {
   if (!item) return ''
@@ -21,16 +29,60 @@ function presentAaShare(share, friends) {
     map[friend.id] = friend.name
     return map
   }, {})
+  const splitSummary = share.splitSummary && Array.isArray(share.splitSummary.participants)
+    ? share.splitSummary
+    : null
   const friendNames = (share.friendIds || []).map(id => friendMap[id]).filter(Boolean)
-  const peopleCount = Number(share.peopleCount) || friendNames.length + 1
+  const splitFriendNames = splitSummary
+    ? splitSummary.participants.filter(participant => participant.id !== 'self').map(participant => participant.name).filter(Boolean)
+    : []
+  const peopleCount = Number(share.peopleCount) || Number(splitSummary && splitSummary.peopleCount) || friendNames.length + 1
   const perPerson = Number.isFinite(Number(share.perPersonAmount))
     ? Number(share.perPersonAmount)
     : peopleCount > 0 ? Number(share.total || 0) / peopleCount : 0
+  const participantAmounts = splitSummary
+    ? splitSummary.participants.map(participant => Object.assign({}, participant, {
+      amountLabel: participant.amountLabel || formatPrice(participant.amount || 0)
+    }))
+    : [{ id: 'self', name: '我', amountLabel: formatPrice(perPerson) || '¥0.00' }]
+      .concat((share.friendIds || []).map(id => ({
+        id,
+        name: friendMap[id] || '已选择好友',
+        amountLabel: formatPrice(perPerson) || '¥0.00'
+      })))
+  const itemRows = splitSummary && Array.isArray(splitSummary.items)
+    ? splitSummary.items.map(item => Object.assign({}, item, {
+      amountLabel: item.amountLabel || formatPrice(item.amount || 0),
+      participantLabel: item.participantLabel || (item.participantNames || []).join('、')
+    }))
+    : []
   return Object.assign({}, share, {
-    friendNames: friendNames.join('、') || '已选择好友',
+    friendNames: (friendNames.length ? friendNames : splitFriendNames).join('、') || '已选择好友',
     peopleCount,
-    perPersonLabel: formatPrice(perPerson) || '¥0.00'
+    perPersonLabel: formatPrice(perPerson) || '¥0.00',
+    splitModeLabel: splitSummary ? '按每项参与人计算' : '所有人均摊',
+    participantAmounts,
+    itemRows
   })
+}
+
+function defaultAaFriendIds(items, friends) {
+  const allFriendIds = (friends || []).map(friend => friend.id)
+  const selected = new Set()
+  let hasLegacyItem = false
+  const sourceItems = Array.isArray(items) ? items : []
+  sourceItems.forEach(item => {
+    if (!item.hasPrice && parsePrice(item.price) === null) return
+    if (Array.isArray(item.participantIds) && item.participantIds.length) {
+      item.participantIds.forEach(id => {
+        if (id !== 'self' && allFriendIds.includes(id)) selected.add(id)
+      })
+    } else {
+      hasLegacyItem = true
+    }
+  })
+  if (hasLegacyItem) allFriendIds.forEach(id => selected.add(id))
+  return allFriendIds.filter(id => selected.has(id))
 }
 
 Page({
@@ -156,8 +208,9 @@ Page({
       })
       return
     }
+    const defaultFriendIds = defaultAaFriendIds(this.data.items, friends)
     this.setData({
-      friends: friends.map(friend => Object.assign({}, friend, { selected: false })),
+      friends: friends.map(friend => Object.assign({}, friend, { selected: defaultFriendIds.includes(friend.id) })),
       showAaPicker: true
     })
   },
@@ -183,7 +236,29 @@ Page({
       wx.showToast({ title: '请选择至少一位好友', icon: 'none' })
       return
     }
+    const selectedIds = new Set(['self'].concat(friendIds))
+    const friendMap = this.data.friends.reduce((map, friend) => {
+      map[friend.id] = friend.name
+      return map
+    }, {})
+    const missingParticipantIds = []
+    this.data.items.forEach(item => {
+      if (!item.hasPrice && parsePrice(item.price) === null) return
+      participantIdsForItem(item, friendIds).forEach(id => {
+        if (id !== 'self' && friendMap[id] && !selectedIds.has(id) && !missingParticipantIds.includes(id)) {
+          missingParticipantIds.push(id)
+        }
+      })
+    })
+    if (missingParticipantIds.length) {
+      wx.showToast({
+        title: `请先选择${missingParticipantIds.map(id => friendMap[id]).join('、')}`,
+        icon: 'none'
+      })
+      return
+    }
     const summary = this.data.expenseSummary
+    const splitSummary = summarizeTripSplit({ items: this.data.items }, this.data.friends, friendIds)
     const saved = socialStore.shareTrip({
       tripId: this.data.tripId,
       tripTitle: this.data.trip && this.data.trip.title,
@@ -191,6 +266,7 @@ Page({
       total: summary.total,
       totalLabel: summary.totalLabel,
       breakdown: summary.breakdown,
+      splitSummary,
       itinerary: this.data.items.map(item => ({
         id: item.id,
         typeLabel: item.typeLabel,
@@ -200,7 +276,11 @@ Page({
         locationStart: item.locationStart,
         locationEnd: item.locationEnd,
         priceLabel: item.priceLabel,
-        durationLabel: item.durationLabel
+        durationLabel: item.durationLabel,
+        participantIds: item.participantIds || [],
+        participantNames: (item.participantIds || []).map(id => id === 'self'
+          ? '我'
+          : (this.data.friends.find(friend => friend.id === id) || {}).name).filter(Boolean)
       }))
     })
     this.setData({

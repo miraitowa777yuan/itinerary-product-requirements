@@ -30,6 +30,8 @@ const COST_COLORS = {
   other: '#82928A'
 }
 
+const SELF_PARTICIPANT_ID = 'self'
+
 function parsePrice(value) {
   const raw = String(value == null ? '' : value).trim().replace(/[¥￥元人民币,\s]/g, '')
   if (!raw) return null
@@ -80,6 +82,85 @@ function summarizeTripCosts(trip) {
     itemCount: items.length,
     hasCosts: pricedItemCount > 0,
     breakdown
+  }
+}
+
+function uniqueParticipantIds(values) {
+  return Array.from(new Set((Array.isArray(values) ? values : []).filter(Boolean)))
+}
+
+function participantIdsForItem(item, shareFriendIds) {
+  if (Array.isArray(item && item.participantIds) && item.participantIds.length) {
+    return uniqueParticipantIds(item.participantIds)
+  }
+  return uniqueParticipantIds([SELF_PARTICIPANT_ID].concat(shareFriendIds || []))
+}
+
+function summarizeTripSplit(trip, friends, shareFriendIds) {
+  const selectedFriendIds = uniqueParticipantIds(shareFriendIds).filter(id => id !== SELF_PARTICIPANT_ID)
+  const participantList = [{ id: SELF_PARTICIPANT_ID, name: '我', avatarText: '我' }].concat(
+    (friends || [])
+      .filter(friend => selectedFriendIds.includes(friend.id))
+      .map(friend => ({ id: friend.id, name: friend.name, avatarText: friend.avatarText || String(friend.name || '友').slice(0, 1) }))
+  )
+  const participantMap = participantList.reduce((map, participant) => {
+    map[participant.id] = participant
+    return map
+  }, {})
+  const amounts = participantList.reduce((map, participant) => {
+    map[participant.id] = 0
+    return map
+  }, {})
+  const itemRows = []
+  const items = Array.isArray(trip && trip.items) ? trip.items : []
+  items.forEach(item => {
+    const amount = parsePrice(item && item.price)
+    if (amount === null) return
+    const participantIds = participantIdsForItem(item, selectedFriendIds)
+      .filter(id => participantMap[id])
+    const includedIds = participantIds.length ? participantIds : [SELF_PARTICIPANT_ID]
+    const amountCents = Math.round(amount * 100)
+    const baseCents = Math.floor(amountCents / includedIds.length)
+    const remainderCents = amountCents - baseCents * includedIds.length
+    const participantAmounts = includedIds.map((id, index) => {
+      const cents = baseCents + (index < remainderCents ? 1 : 0)
+      const participantAmount = cents / 100
+      amounts[id] += participantAmount
+      return {
+        id,
+        name: participantMap[id].name,
+        amount: participantAmount,
+        amountLabel: formatPrice(participantAmount)
+      }
+    })
+    const perPersonAmount = amount / includedIds.length
+    itemRows.push({
+      id: item.id,
+      title: item.title || TYPE_LABELS[item.type] || '行程',
+      type: item.type,
+      typeLabel: item.typeLabel || TYPE_LABELS[item.type] || '行程',
+      amount,
+      amountLabel: formatPrice(amount),
+      participantIds: includedIds,
+      participantNames: includedIds.map(id => participantMap[id].name),
+      participantLabel: includedIds.map(id => participantMap[id].name).join('、'),
+      participantAmounts,
+      participantAmountsLabel: participantAmounts.map(participant => `${participant.name} ${participant.amountLabel}`).join(' · '),
+      perPersonAmount,
+      perPersonLabel: formatPrice(perPersonAmount)
+    })
+  })
+  const total = itemRows.reduce((sum, item) => sum + item.amount, 0)
+  const participants = participantList.map(participant => Object.assign({}, participant, {
+    amount: amounts[participant.id] || 0,
+    amountLabel: formatPrice(amounts[participant.id] || 0)
+  }))
+  return {
+    total,
+    totalLabel: formatPrice(total) || '¥0.00',
+    peopleCount: participants.length,
+    participants,
+    items: itemRows
   }
 }
 
@@ -145,6 +226,8 @@ module.exports = {
   parsePrice,
   formatPrice,
   summarizeTripCosts,
+  summarizeTripSplit,
+  participantIdsForItem,
   presentTrip,
   presentItem
 }

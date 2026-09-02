@@ -143,6 +143,74 @@
   line-height: 1.5;
 }
 
+.field-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.field-label-row .field-label {
+  margin-bottom: 12rpx;
+}
+
+.field-label-hint {
+  color: #8a928d;
+  font-size: 20rpx;
+}
+
+.participant-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.participant-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10rpx 16rpx 10rpx 10rpx;
+  border: 2rpx solid #e1e7e2;
+  border-radius: 999rpx;
+  color: #66736c;
+  background: #fafcf9;
+  font-size: 22rpx;
+}
+
+.participant-chip--selected {
+  border-color: #a8c5b8;
+  color: #17483c;
+  background: #eaf4ee;
+  font-weight: 700;
+}
+
+.participant-avatar {
+  display: flex;
+  width: 38rpx;
+  height: 38rpx;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8rpx;
+  border-radius: 14rpx;
+  color: #fff;
+  background: #8b6b4a;
+  font-size: 18rpx;
+  font-weight: 700;
+}
+
+.participant-chip--selected .participant-avatar {
+  background: #1d4f42;
+}
+
+.participant-name {
+  white-space: nowrap;
+}
+
+.participant-check {
+  margin-left: 8rpx;
+  color: #1d4f42;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
 .airline-hint {
   color: #1d4f42;
   font-weight: 700;

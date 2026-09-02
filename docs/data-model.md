@@ -49,6 +49,7 @@
 | locationStart / locationEnd | 起终点结构化地点 |
 | address | 详细地址 |
 | price / currency | 订单或行程价格；当前原型默认人民币 CNY，可为空，识别后允许用户修正 |
+| participantIds | 参与该项目费用分摊的用户 / 好友标识；至少包含一人 |
 | notes | 备注 |
 | source | manual / pasted / ocr / integration |
 | sourceConfidence | 自动解析置信度，仅用于辅助确认 |
@@ -149,7 +150,7 @@
 
 ## 7. Friend
 
-- id、ownerId、name、note、createdAt
+- id、ownerId、accountNo、name、note、createdAt
 - 好友关系用于选择共享对象；正式版本应由账号 / unionId 建立，不以昵称作为唯一身份
 
 ## 8. TripShare
@@ -157,6 +158,7 @@
 - id、tripId、ownerId、friendIds
 - sharedScope：itinerary_and_expense
 - total、breakdown、perPersonAmount：共享时保存的账单快照与均摊信息
+- splitSummary：按项目参与人计算的每人应付金额与项目分摊明细
 - itinerary：仅包含已授权的行程摘要，不应默认包含订单号、证件号等敏感字段
 - sharedAt、revokedAt
 

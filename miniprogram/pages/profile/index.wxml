@@ -10,6 +10,7 @@
     <view class="identity-copy">
       <view class="identity-name">{{profile.name}}</view>
       <view class="muted">{{profile.description}}</view>
+      <view class="account-line"><text>账户号 {{profile.accountNo}}</text><text class="copy-account" role="button" bindtap="copyAccountNo">复制</text></view>
     </view>
   </view>
 
@@ -22,8 +23,21 @@
   </view>
 
   <view wx:if="{{showAddFriend}}" class="friend-form-card">
-    <view class="friend-form-title">添加一位好友</view>
-    <input class="friend-input" value="{{newFriendName}}" placeholder="好友昵称" placeholder-class="friend-placeholder" data-field="newFriendName" bindinput="updateFriendField" />
+    <view class="friend-form-title">通过账户号添加好友</view>
+    <view class="friend-search-line">
+      <input class="friend-input friend-account-input" value="{{newFriendAccountNo}}" placeholder="例如：TRV-1234-5678" placeholder-class="friend-placeholder" data-field="newFriendAccountNo" bindinput="updateFriendField" />
+      <button class="friend-search-button" bindtap="searchAccount">搜索</button>
+    </view>
+    <view class="friend-form-help">每位用户都有唯一账户号；本机原型会先在本地通讯录中搜索。</view>
+    <view wx:if="{{accountSearchStatus === 'found'}}" class="account-result account-result--found">
+      <view class="account-result-title">已找到好友</view>
+      <view>{{accountSearchResult.name}} · {{accountSearchResult.accountNo}}</view>
+    </view>
+    <view wx:if="{{accountSearchStatus === 'not_found'}}" class="account-result account-result--hint">
+      本机未找到该账户，可填写昵称后添加；正式版本接入云端后可返回对方资料。
+    </view>
+    <view wx:if="{{accountSearchStatus === 'self'}}" class="account-result account-result--error">这是你的账户号，不能添加自己。</view>
+    <input class="friend-input" value="{{newFriendName}}" placeholder="对方昵称（可选）" placeholder-class="friend-placeholder" data-field="newFriendName" bindinput="updateFriendField" />
     <input class="friend-input" value="{{newFriendNote}}" placeholder="备注（可选，例如：同行人）" placeholder-class="friend-placeholder" data-field="newFriendNote" bindinput="updateFriendField" />
     <view class="friend-form-actions">
       <button class="friend-cancel-button" bindtap="cancelAddFriend">取消</button>
@@ -37,7 +51,13 @@
         <view class="friend-avatar">{{item.avatarText}}</view>
         <view>
           <view class="friend-name">{{item.name}}</view>
-          <view class="friend-note">{{item.note || '可共享旅行与 AA 账单'}}</view>
+          <view class="friend-account">{{item.accountNo}}</view>
+          <view wx:if="{{editingFriendId !== item.id}}" class="friend-note">{{item.note || '可共享旅行与 AA 账单'}}</view>
+          <view wx:if="{{editingFriendId !== item.id}}" class="friend-edit" role="button" data-id="{{item.id}}" bindtap="startEditFriend">编辑备注</view>
+          <view wx:if="{{editingFriendId === item.id}}" class="friend-note-editor">
+            <input class="friend-note-input" value="{{editingFriendNote}}" placeholder="输入备注" placeholder-class="friend-placeholder" bindinput="updateEditingFriendNote" />
+            <view class="friend-note-actions"><text class="friend-note-save" role="button" bindtap="saveEditFriend">保存</text><text class="friend-note-cancel" role="button" bindtap="cancelEditFriend">取消</text></view>
+          </view>
         </view>
       </view>
       <view class="friend-row-right">

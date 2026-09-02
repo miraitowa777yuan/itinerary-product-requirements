@@ -38,6 +38,23 @@
   font-weight: 700;
 }
 
+.account-line {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 10rpx;
+  color: #6c7972;
+  font-size: 20rpx;
+}
+
+.copy-account {
+  padding: 4rpx 10rpx;
+  border-radius: 999rpx;
+  color: #1d4f42;
+  background: #e8f0eb;
+  font-weight: 700;
+}
+
 .profile-section-title {
   margin: 42rpx 4rpx 18rpx;
   color: #5a635e;
@@ -102,6 +119,12 @@
   font-weight: 700;
 }
 
+.friend-search-line {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
 .friend-input {
   box-sizing: border-box;
   width: 100%;
@@ -114,6 +137,66 @@
   background: #fafaf8;
   font-size: 26rpx;
   line-height: 82rpx;
+}
+
+.friend-search-line .friend-input {
+  margin-top: 0;
+}
+
+.friend-account-input {
+  min-width: 0;
+  flex: 1;
+}
+
+.friend-search-button {
+  flex: none;
+  margin: 0;
+  padding: 0 22rpx;
+  border-radius: 16rpx;
+  color: #fff;
+  background: #5575a8;
+  font-size: 23rpx;
+  font-weight: 700;
+  line-height: 82rpx;
+}
+
+.friend-search-button::after {
+  border: 0;
+}
+
+.friend-form-help {
+  margin-top: 10rpx;
+  color: #8a928d;
+  font-size: 20rpx;
+  line-height: 1.5;
+}
+
+.account-result {
+  margin-top: 14rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 16rpx;
+  font-size: 21rpx;
+  line-height: 1.5;
+}
+
+.account-result--found {
+  color: #1d4f42;
+  background: #eaf4ee;
+}
+
+.account-result--hint {
+  color: #866c4b;
+  background: #fff7e9;
+}
+
+.account-result--error {
+  color: #9f3229;
+  background: #fcedea;
+}
+
+.account-result-title {
+  margin-bottom: 2rpx;
+  font-weight: 700;
 }
 
 .friend-placeholder {
@@ -187,6 +270,13 @@
   font-weight: 700;
 }
 
+.friend-account {
+  margin: 4rpx 0 0 16rpx;
+  color: #6c7972;
+  font-size: 19rpx;
+  letter-spacing: 0.5rpx;
+}
+
 .friend-note {
   overflow: hidden;
   max-width: 350rpx;
@@ -195,6 +285,45 @@
   font-size: 21rpx;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.friend-edit {
+  margin: 8rpx 0 0 16rpx;
+  color: #5575a8;
+  font-size: 20rpx;
+}
+
+.friend-note-editor {
+  margin: 8rpx 0 0 16rpx;
+}
+
+.friend-note-input {
+  box-sizing: border-box;
+  width: 320rpx;
+  height: 58rpx;
+  padding: 0 12rpx;
+  border: 2rpx solid #d7e2dc;
+  border-radius: 12rpx;
+  color: #202522;
+  background: #fafcf9;
+  font-size: 21rpx;
+  line-height: 58rpx;
+}
+
+.friend-note-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 6rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.friend-note-save {
+  color: #1d4f42;
+}
+
+.friend-note-cancel {
+  color: #8a928d;
 }
 
 .friend-row-right {
