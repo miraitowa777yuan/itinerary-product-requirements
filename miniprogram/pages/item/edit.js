@@ -10,6 +10,7 @@ const types = [
   { value: 'activity', label: '活动' },
   { value: 'food', label: '餐饮' },
   { value: 'local_transport', label: '当地交通' },
+  { value: 'taxi', label: '打车' },
   { value: 'custom', label: '自定义' }
 ]
 
@@ -19,9 +20,42 @@ function emptyForm() {
     locationStart: '', locationEnd: '', locationStartCity: '', locationEndCity: '',
     departureTerminal: '', arrivalTerminal: '', transportNo: '', airlineName: '',
     city: '', roomType: '', checkOutDate: '', cabinClass: '', seatClass: '',
+    price: '', currency: 'CNY', durationMinutes: '',
     driveToNextMinutes: '', bookingStatus: 'waiting_to_book', expectedSaleAt: '',
     preferredSeatClass: '', notes: '', source: 'manual'
   }
+}
+
+function transferEndpoint(item, side) {
+  if (!item) return ''
+  if (item.type === 'hotel') return item.title || item.city || ''
+  if (side === 'from') return item.locationEnd || item.locationStart || item.title || ''
+  return item.locationStart || item.locationEnd || item.title || ''
+}
+
+function normalizePrice(value) {
+  const raw = String(value == null ? '' : value).trim().replace(/[¥￥元人民币,\s]/g, '')
+  if (!raw) return ''
+  if (!/^\d+(?:\.\d{1,2})?$/.test(raw)) return null
+  const amount = Number(raw)
+  if (!Number.isFinite(amount) || amount < 0 || amount > 100000000) return null
+  return raw.replace(/^0+(?=\d)/, '')
+}
+
+function normalizeDuration(value) {
+  const raw = String(value == null ? '' : value).trim()
+  if (!raw) return ''
+  const minutes = Number(raw)
+  if (!Number.isFinite(minutes) || minutes <= 0 || minutes > 1440) return null
+  return String(Math.round(minutes))
+}
+
+function addMinutesToTime(time, minutes) {
+  const match = String(time || '').match(/^(\d{1,2}):(\d{2})$/)
+  if (!match) return ''
+  const total = Number(match[1]) * 60 + Number(match[2]) + Number(minutes || 0)
+  const normalized = ((total % 1440) + 1440) % 1440
+  return `${String(Math.floor(normalized / 60)).padStart(2, '0')}:${String(normalized % 60).padStart(2, '0')}`
 }
 
 Page({
@@ -49,6 +83,25 @@ Page({
         nextData.seatClassIndex = Math.max(0, TRAIN_CLASSES.indexOf(form.seatClass))
         nextData.preferredSeatClassIndex = Math.max(0, TRAIN_CLASSES.indexOf(form.preferredSeatClass))
       }
+    } else if (options.type === 'taxi') {
+      const trip = tripStore.getTrip(tripId)
+      const fromItem = trip && trip.items.find(item => item.id === options.fromId)
+      const toItem = trip && trip.items.find(item => item.id === options.toId)
+      const fromLabel = transferEndpoint(fromItem, 'from')
+      const toLabel = transferEndpoint(toItem, 'to')
+      const form = Object.assign(emptyForm(), {
+        type: 'taxi',
+        title: [fromLabel, toLabel].filter(Boolean).join(' → '),
+        date: (fromItem && fromItem.date) || (toItem && toItem.date) || '',
+        startTime: (fromItem && (fromItem.endTime || fromItem.startTime)) || '',
+        locationStart: fromLabel,
+        locationEnd: toLabel,
+        bookingStatus: 'confirmed',
+        source: 'manual',
+        notes: '从上一项行程衔接'
+      })
+      nextData.form = form
+      nextData.typeIndex = Math.max(0, types.findIndex(type => type.value === 'taxi'))
     }
     this.setData(nextData)
     wx.setNavigationBarTitle({ title: itemId ? '编辑行程' : '添加行程' })
@@ -419,6 +472,24 @@ Page({
     if (form.type === 'hotel') {
       form.locationStart = ''; form.locationEnd = ''
       form.locationStartCity = ''; form.locationEndCity = ''
+    }
+    const price = normalizePrice(form.price)
+    if (price === null) {
+      wx.showToast({ title: '价格请填写非负数字，最多两位小数', icon: 'none' })
+      return
+    }
+    form.price = price
+    form.currency = 'CNY'
+    if (form.type === 'taxi') {
+      const durationMinutes = normalizeDuration(form.durationMinutes)
+      if (durationMinutes === null || !durationMinutes) {
+        wx.showToast({ title: '请填写 1–1440 分钟的车程时长', icon: 'none' })
+        return
+      }
+      form.durationMinutes = durationMinutes
+      if (form.startTime && !form.endTime) form.endTime = addMinutesToTime(form.startTime, durationMinutes)
+    } else {
+      form.durationMinutes = ''
     }
     if (form.driveToNextMinutes !== '') {
       const minutes = Number(form.driveToNextMinutes)

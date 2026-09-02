@@ -54,6 +54,76 @@ function extractTimes(text) {
   return values
 }
 
+function normalizePriceToken(value) {
+  const cleaned = String(value || '').replace(/,/g, '').trim()
+  const match = cleaned.match(/^(\d{1,8})(?:\.(\d{1,2}))?$/)
+  if (!match) return ''
+  const integer = String(Number(match[1]))
+  return match[2] ? `${integer}.${match[2]}` : integer
+}
+
+function lineBoundsAt(text, index) {
+  const start = text.lastIndexOf('\n', index) + 1
+  const nextLine = text.indexOf('\n', index)
+  return { start, end: nextLine >= 0 ? nextLine : text.length }
+}
+
+function extractPriceCandidates(text) {
+  const candidates = []
+  const source = String(text || '')
+  const pushCandidate = (value, index, kind) => {
+    const normalized = normalizePriceToken(value)
+    if (!normalized) return
+    const existing = candidates.find(item => item.value === normalized && Math.abs(item.index - index) < 5)
+    if (existing) {
+      if (kind === 'currency') existing.hasCurrency = true
+      if (kind === 'yuan') existing.hasYuan = true
+      return
+    }
+    const bounds = lineBoundsAt(source, index)
+    candidates.push({
+      value: normalized,
+      index,
+      line: source.slice(bounds.start, bounds.end),
+      hasCurrency: kind === 'currency',
+      hasYuan: kind === 'yuan'
+    })
+  }
+  const currencyPattern = /(?:¥|￥|CNY|RMB)\s*([0-9]{1,8}(?:[,.][0-9]{1,2})?)/gi
+  let match
+  while ((match = currencyPattern.exec(source))) pushCandidate(match[1], match.index, 'currency')
+  const yuanPattern = /([0-9]{1,8}(?:[,.][0-9]{1,2})?)\s*(?:元|人民币)/gi
+  while ((match = yuanPattern.exec(source))) pushCandidate(match[1], match.index, 'yuan')
+  const labelPattern = /(?:总计|订单金额|订单总额|实付|应付|支付金额|合计|总价|房费|票价|票面价|票价总额|价格|金额|在线付|在线支付)[^\n\d]{0,12}([0-9]{1,8}(?:[,.][0-9]{1,2})?)/gi
+  while ((match = labelPattern.exec(source))) pushCandidate(match[1], match.index + match[0].indexOf(match[1]), 'label')
+  return candidates
+}
+
+function findPrice(text, type) {
+  const candidates = extractPriceCandidates(text)
+  if (!candidates.length) return ''
+  const strongLabels = /(总计|订单金额|订单总额|实付|应付|支付金额|合计|总价|房费|票价总额)/
+  const mediumLabels = /(票价|票面价|价格|金额|在线付|在线支付|预订|预约)/
+  const noiseLabels = /(优惠|折扣|立减|减免|积分|余额|押金|退款|返现|优惠券|原价|每晚|每人)/
+  const typeLabels = type === 'hotel'
+    ? /(酒店|房费|入住|房型|房间)/
+    : (type === 'flight' ? /(航班|机票|舱|机场)/ : (type === 'train' ? /(车次|列车|席|座|高铁|火车)/ : /./))
+  const scored = candidates.map(candidate => {
+    const line = candidate.line
+    let score = 0
+    if (candidate.hasCurrency) score += 100
+    if (candidate.hasYuan) score += 80
+    if (strongLabels.test(line)) score += 220
+    if (mediumLabels.test(line)) score += 80
+    if (typeLabels.test(line)) score += 35
+    if (noiseLabels.test(line)) score -= 55
+    if (/订单号|流水号|编号|日期|时间|取消政策/.test(line)) score -= 80
+    return Object.assign({}, candidate, { score })
+  })
+  scored.sort((a, b) => b.score - a.score || a.index - b.index)
+  return scored[0].value
+}
+
 function nearbyText(text, index, radius) {
   return text.slice(Math.max(0, index - radius), Math.min(text.length, index + radius))
 }
@@ -350,6 +420,8 @@ function parseOrderText(rawText) {
     city: '',
     roomType: '',
     checkOutDate: '',
+    price: findPrice(text, type),
+    currency: 'CNY',
     expectedSaleAt: '',
     source: 'ocr'
   }

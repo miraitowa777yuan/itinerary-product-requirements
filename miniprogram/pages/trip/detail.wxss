@@ -11,6 +11,101 @@
   color: #69736d;
 }
 
+.expense-card {
+  margin: 0 0 42rpx;
+  padding: 28rpx;
+  border: 2rpx solid #dce9e3;
+  border-radius: 26rpx;
+  background: linear-gradient(135deg, #edf5f0 0%, #f9f6ed 100%);
+}
+
+.expense-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.expense-eyebrow {
+  color: #738079;
+  font-size: 19rpx;
+  letter-spacing: 2rpx;
+}
+
+.expense-title {
+  margin-top: 8rpx;
+  color: #17483c;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.expense-total {
+  color: #17483c;
+  font-size: 38rpx;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.expense-meta {
+  margin-top: 14rpx;
+  color: #6e7c74;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.expense-toggle {
+  display: inline-block;
+  margin: 20rpx 0 0;
+  padding: 0 22rpx;
+  border: 2rpx solid #b9d0c4;
+  border-radius: 999rpx;
+  color: #17483c;
+  background: rgba(255, 255, 255, 0.65);
+  font-size: 22rpx;
+  line-height: 64rpx;
+}
+
+.expense-toggle::after {
+  border: 0;
+}
+
+.expense-breakdown {
+  margin-top: 20rpx;
+  padding-top: 8rpx;
+  border-top: 2rpx solid rgba(185, 208, 196, 0.7);
+}
+
+.expense-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  color: #29352f;
+}
+
+.expense-row-label {
+  font-size: 25rpx;
+  font-weight: 700;
+}
+
+.expense-row-count {
+  margin-left: 12rpx;
+  color: #78857e;
+  font-size: 21rpx;
+}
+
+.expense-row-amount {
+  color: #17483c;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.expense-empty {
+  padding: 14rpx 0 4rpx;
+  color: #78857e;
+  font-size: 22rpx;
+}
+
 .section-heading {
   display: flex;
   align-items: center;
@@ -41,6 +136,10 @@
   display: grid;
   grid-template-columns: 150rpx 34rpx 1fr;
   min-height: 210rpx;
+}
+
+.timeline-content {
+  min-width: 0;
 }
 
 .time-column {
@@ -128,6 +227,13 @@
   font-weight: 700;
 }
 
+.item-price {
+  margin-top: 14rpx;
+  color: #a64f1c;
+  font-size: 27rpx;
+  font-weight: 700;
+}
+
 .item-route,
 .item-detail {
   margin-top: 10rpx;
@@ -154,6 +260,33 @@
 .route-icon { display: flex; width: 44rpx; height: 44rpx; flex: none; align-items: center; justify-content: center; border-radius: 50%; color: #fff; background: #1d4f42; }
 .route-duration { font-size: 24rpx; font-weight: 700; }
 .route-distance { margin-top: 6rpx; color: #67766f; font-size: 20rpx; line-height: 1.5; }
+
+.transfer-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  margin: -8rpx 0 26rpx 16rpx;
+  padding: 16rpx 20rpx;
+  border: 2rpx dashed #b9d0c4;
+  border-radius: 18rpx;
+  color: #17483c;
+  background: #f5faf7;
+}
+
+.transfer-action-title {
+  flex: none;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
+.transfer-action-route {
+  overflow: hidden;
+  color: #738079;
+  font-size: 20rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .ticketed-button {
   margin: 18rpx 0 0;

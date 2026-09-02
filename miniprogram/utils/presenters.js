@@ -8,7 +8,67 @@ const TYPE_LABELS = {
   activity: '活动',
   food: '餐饮',
   local_transport: '当地交通',
+  taxi: '打车',
   custom: '自定义'
+}
+
+const COST_GROUPS = {
+  flight: { key: 'flight', label: '机票' },
+  hotel: { key: 'hotel', label: '酒店' },
+  train: { key: 'train', label: '火车票' },
+  taxi: { key: 'taxi', label: '打车' },
+  intercity_bus: { key: 'intercity_bus', label: '城际巴士' },
+  other: { key: 'other', label: '其他' }
+}
+
+function parsePrice(value) {
+  const raw = String(value == null ? '' : value).trim().replace(/[¥￥元人民币,\s]/g, '')
+  if (!raw) return null
+  if (!/^\d+(?:\.\d{1,2})?$/.test(raw)) return null
+  const amount = Number(raw)
+  return Number.isFinite(amount) && amount >= 0 ? amount : null
+}
+
+function formatPrice(value) {
+  const amount = typeof value === 'number' ? value : parsePrice(value)
+  return amount === null || !Number.isFinite(amount) ? '' : `¥${amount.toFixed(2)}`
+}
+
+function costGroupForType(type) {
+  return COST_GROUPS[type] || COST_GROUPS.other
+}
+
+function summarizeTripCosts(trip) {
+  const groups = {}
+  let total = 0
+  let pricedItemCount = 0
+  const items = Array.isArray(trip && trip.items) ? trip.items : []
+  items.forEach(item => {
+    const amount = parsePrice(item && item.price)
+    if (amount === null) return
+    const group = costGroupForType(item.type)
+    if (!groups[group.key]) groups[group.key] = { key: group.key, label: group.label, amount: 0, count: 0 }
+    groups[group.key].amount += amount
+    groups[group.key].count += 1
+    total += amount
+    pricedItemCount += 1
+  })
+  const order = ['flight', 'hotel', 'train', 'taxi', 'intercity_bus', 'other']
+  const breakdown = order
+    .map(key => groups[key])
+    .filter(Boolean)
+    .map(group => Object.assign({}, group, {
+      amountLabel: formatPrice(group.amount),
+      countLabel: `${group.count} 项`
+    }))
+  return {
+    total,
+    totalLabel: formatPrice(total) || '¥0.00',
+    pricedItemCount,
+    itemCount: items.length,
+    hasCosts: pricedItemCount > 0,
+    breakdown
+  }
 }
 
 function isPastTrip(trip) {
@@ -46,6 +106,7 @@ function presentTrip(trip) {
 }
 
 function presentItem(item) {
+  const priceValue = parsePrice(item.price)
   return Object.assign({}, item, {
     typeLabel: TYPE_LABELS[item.type] || '行程',
     bookingStatusLabel: bookingStatusLabel(item),
@@ -54,6 +115,10 @@ function presentItem(item) {
     timeLabel: item.startTime ? `${item.startTime}${item.endTime ? `–${item.endTime}` : ''}` : '当天',
     travelClassLabel: item.seatClass || item.cabinClass || item.preferredSeatClass || '',
     hotelMetaLabel: [item.city, item.roomType, item.checkOutDate ? `退房 ${item.checkOutDate}` : ''].filter(Boolean).join(' · '),
+    priceValue,
+    priceLabel: formatPrice(priceValue),
+    hasPrice: priceValue !== null,
+    durationLabel: item.type === 'taxi' && item.durationMinutes ? `车程 ${item.durationMinutes} 分钟` : '',
     airlineName: item.type === 'flight' ? (item.airlineName || airlineFromFlightNo(item.transportNo)) : '',
     terminalLabel: item.type === 'flight'
       ? [item.departureTerminal ? `出发 ${item.departureTerminal}` : '', item.arrivalTerminal ? `到达 ${item.arrivalTerminal}` : ''].filter(Boolean).join(' · ')
@@ -63,6 +128,9 @@ function presentItem(item) {
 
 module.exports = {
   TYPE_LABELS,
+  parsePrice,
+  formatPrice,
+  summarizeTripCosts,
   presentTrip,
   presentItem
 }

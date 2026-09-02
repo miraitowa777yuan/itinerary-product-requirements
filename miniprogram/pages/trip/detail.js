@@ -1,11 +1,26 @@
 const tripStore = require('../../utils/trip-store')
-const { presentTrip, presentItem } = require('../../utils/presenters')
+const { presentTrip, presentItem, summarizeTripCosts } = require('../../utils/presenters')
+
+function transferEndpoint(item, side) {
+  if (!item) return ''
+  if (item.type === 'hotel') return item.title || item.city || ''
+  if (side === 'from') return item.locationEnd || item.locationStart || item.title || ''
+  return item.locationStart || item.locationEnd || item.title || ''
+}
+
+function canAddTaxiBetween(fromItem, toItem) {
+  const supportedTypes = ['hotel', 'flight', 'train', 'intercity_bus', 'local_transport']
+  if (!fromItem || !toItem || !supportedTypes.includes(fromItem.type) || !supportedTypes.includes(toItem.type)) return false
+  return Boolean(transferEndpoint(fromItem, 'from') && transferEndpoint(toItem, 'to'))
+}
 
 Page({
   data: {
     tripId: '',
     trip: null,
-    items: []
+    items: [],
+    expenseSummary: { totalLabel: '¥0.00', pricedItemCount: 0, itemCount: 0, hasCosts: false, breakdown: [] },
+    showExpenseDetails: false
   },
 
   onLoad(options) {
@@ -23,10 +38,24 @@ Page({
       return
     }
     wx.setNavigationBarTitle({ title: trip.title })
+    const items = trip.items.map(presentItem).map((item, index, list) => {
+      const nextItem = list[index + 1]
+      if (!canAddTaxiBetween(item, nextItem)) return item
+      return Object.assign({}, item, {
+        showTaxiAction: true,
+        transferToId: nextItem.id,
+        transferRouteLabel: `${transferEndpoint(item, 'from')} → ${transferEndpoint(nextItem, 'to')}`
+      })
+    })
     this.setData({
       trip: presentTrip(trip),
-      items: trip.items.map(presentItem)
+      items,
+      expenseSummary: summarizeTripCosts(trip)
     })
+  },
+
+  toggleExpenseDetails() {
+    this.setData({ showExpenseDetails: !this.data.showExpenseDetails })
   },
 
   addItem() {
@@ -36,6 +65,15 @@ Page({
   editItem(event) {
     wx.navigateTo({
       url: `/pages/item/edit?tripId=${this.data.tripId}&itemId=${event.currentTarget.dataset.id}`
+    })
+  },
+
+  addTaxiBetween(event) {
+    const fromId = event.currentTarget.dataset.fromId
+    const toId = event.currentTarget.dataset.toId
+    if (!fromId || !toId) return
+    wx.navigateTo({
+      url: `/pages/item/edit?tripId=${encodeURIComponent(this.data.tripId)}&type=taxi&fromId=${encodeURIComponent(fromId)}&toId=${encodeURIComponent(toId)}`
     })
   },
 

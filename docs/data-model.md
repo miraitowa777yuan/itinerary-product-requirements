@@ -40,7 +40,7 @@
 | 字段 | 含义 |
 |---|---|
 | id / tripId | 项目与所属旅行 |
-| type | flight / train / hotel / activity / food / local_transport / custom |
+| type | flight / train / hotel / taxi / activity / food / local_transport / custom |
 | title | 用户可理解的名称 |
 | status | planned / confirmed / in_progress / completed / cancelled |
 | startAt / endAt | 标准时间，可为空 |
@@ -48,6 +48,7 @@
 | allDay | 是否为当天事项 |
 | locationStart / locationEnd | 起终点结构化地点 |
 | address | 详细地址 |
+| price / currency | 订单或行程价格；当前原型默认人民币 CNY，可为空，识别后允许用户修正 |
 | notes | 备注 |
 | source | manual / pasted / ocr / integration |
 | sourceConfidence | 自动解析置信度，仅用于辅助确认 |
@@ -108,6 +109,13 @@
 - 起点、终点、预计时长
 - 预订信息、车辆信息、司机联系信息（敏感）
 
+### 打车 TaxiDetail
+
+- 起点、终点
+- durationMinutes：预计车程分钟数，要求用户手动确认
+- price：打车价格（人民币，可为空）
+- 可由相邻酒店、机场或车站之间的快捷入口预填起终点、日期和上一项结束时间
+
 ## 4. Place
 
 - id、名称、格式化地址
@@ -128,6 +136,8 @@
 附件访问必须通过授权校验与短时有效地址，不能将永久公开 URL 写入项目。
 
 行程项目可包含 `driveToNextMinutes`，表示用户手动填写的“从当前项目到时间线下一项”的驾车分钟数。该字段不调用地图服务，也不承诺实时路况准确性。
+
+行程项目可包含 `price` 与 `currency`。订单截图识别会从总计、实付、订单金额、房费或票价等上下文提取价格；由于订单版式差异，保存前始终允许用户手动调整。旅行详情按项目类型汇总价格，形成机酒记账及打车等费用明细。
 
 ## 6. TripMember
 

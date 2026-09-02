@@ -44,6 +44,18 @@ assert.strictEqual(trainSearchScreenshot.locationEndCity, '苏州')
 assert.strictEqual(trainSearchScreenshot.title, '上海 → 苏州')
 assert.strictEqual(trainSearchScreenshot.expectedSaleAt, '2026-09-18 13:45')
 assert.strictEqual(trainSearchScreenshot.seatClass, '')
+assert.strictEqual(trainSearchScreenshot.price, '')
+
+const pricedTrain = parseOrderText([
+  '10月02日 周五出发',
+  '11:29 上海虹桥站',
+  'G7316',
+  '11:55 苏州站',
+  '二等座 ¥46',
+  '一等座 ¥74',
+  '商务座 ¥162'
+].join('\n'))
+assert.ok(pricedTrain.price)
 
 const hotel = parseOrderText('上海外滩华尔道夫酒店 入住 2026年10月1日 退房 2026年10月3日 豪华双床房 城市：上海')
 assert.strictEqual(hotel.type, 'hotel')
@@ -98,6 +110,7 @@ assert.strictEqual(ctripFlight.startTime, '07:40')
 assert.strictEqual(ctripFlight.endTime, '09:55')
 assert.strictEqual(ctripFlight.departureTerminal, 'T3')
 assert.strictEqual(ctripFlight.arrivalTerminal, 'T2')
+assert.strictEqual(ctripFlight.price, '2200')
 
 const huazhuHotel = parseOrderText([
   '3:02',
@@ -117,6 +130,16 @@ assert.strictEqual(huazhuHotel.date, '2026-09-18')
 assert.strictEqual(huazhuHotel.checkOutDate, '2026-09-19')
 assert.strictEqual(huazhuHotel.startTime, '14:00')
 assert.strictEqual(huazhuHotel.endTime, '14:00')
+
+const pricedHotel = parseOrderText([
+  '预订成功',
+  '全季大观广州塔琶洲会展酒店',
+  '在线付 ¥419.40 明细',
+  '09月18日 14:00入住',
+  '09月19日 14:00离店',
+  '臻舍-大床'
+].join('\n'))
+assert.strictEqual(pricedHotel.price, '419.40')
 
 const atourHotel = parseOrderText([
   '4:04',

@@ -75,6 +75,18 @@
       </view>
     </view>
 
+    <view wx:if="{{form.type === 'taxi'}}" class="field">
+      <text class="field-label">车程时长（分钟） *</text>
+      <input class="field-input" type="number" value="{{form.durationMinutes}}" placeholder="例如：35" placeholder-class="field-placeholder" data-field="durationMinutes" bindinput="updateField" />
+      <view class="field-help">填写预计打车耗时；如果已填写出发时间且未填写结束时间，会自动计算结束时间。</view>
+    </view>
+
+    <view class="field">
+      <text class="field-label">价格（元）</text>
+      <input class="field-input" type="digit" value="{{form.price}}" placeholder="例如：419.40" placeholder-class="field-placeholder" data-field="price" bindinput="updateField" />
+      <view class="field-help">截图识别会自动带入价格，也可以在这里手动调整。</view>
+    </view>
+
     <block wx:if="{{form.type === 'flight' || form.type === 'train'}}">
       <view class="field hub-field">
         <text class="field-label">出发城市与{{form.type === 'flight' ? '机场' : '车站'}}</text>
@@ -110,8 +122,8 @@
       <input class="field-input" value="{{form.locationStart}}" placeholder="例如：上海长途客运南站" placeholder-class="field-placeholder" data-field="locationStart" bindinput="updateField" />
     </view>
 
-    <view class="field" wx:if="{{form.type === 'intercity_bus' || form.type === 'local_transport'}}">
-      <text class="field-label">到达地</text>
+    <view class="field" wx:if="{{form.type === 'intercity_bus' || form.type === 'local_transport' || form.type === 'taxi'}}">
+      <text class="field-label">{{form.type === 'taxi' ? '目的地' : '到达地'}}</text>
       <input class="field-input" value="{{form.locationEnd}}" placeholder="例如：杭州汽车客运中心" placeholder-class="field-placeholder" data-field="locationEnd" bindinput="updateField" />
     </view>
 
@@ -154,7 +166,7 @@
       </view>
     </block>
 
-    <view class="field">
+    <view wx:if="{{form.type !== 'taxi'}}" class="field">
       <text class="field-label">到下一项行程的驾车时长</text>
       <input class="field-input" type="number" value="{{form.driveToNextMinutes}}" placeholder="填写分钟数，例如：45" placeholder-class="field-placeholder" data-field="driveToNextMinutes" bindinput="updateField" />
       <view class="field-help">从这一项的到达地或地点，驾车前往时间线下一项。</view>
