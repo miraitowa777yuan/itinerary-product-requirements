@@ -87,20 +87,21 @@
       </view>
       <view class="timeline-content">
         <view class="item-card item-card--{{item.type}}" data-id="{{item.id}}" bindtap="editItem">
-          <view class="item-topline">
+          <view class="item-topline {{item.type === 'taxi' ? 'item-topline--taxi' : ''}}">
             <text class="item-type item-type--{{item.type}}">{{item.typeLabel}}</text>
-            <text class="status-pill {{item.isWaitingToBook ? 'status-pill--waiting' : ''}}">{{item.bookingStatusLabel}}</text>
+            <text wx:if="{{item.type !== 'taxi'}}" class="status-pill {{item.isWaitingToBook ? 'status-pill--waiting' : ''}}">{{item.bookingStatusLabel}}</text>
+            <text wx:if="{{item.type === 'taxi' && item.priceLabel}}" class="item-price item-price--taxi-inline">{{item.priceLabel}}</text>
           </view>
           <view class="item-title">{{item.title}}</view>
-          <view wx:if="{{item.locationStart && item.hasRoute}}" class="item-route">{{item.locationStart}} → {{item.locationEnd}}</view>
-          <view wx:elif="{{item.locationStart}}" class="item-route">{{item.locationStart}}</view>
+          <view wx:if="{{item.type !== 'taxi' && item.locationStart && item.hasRoute}}" class="item-route">{{item.locationStart}} → {{item.locationEnd}}</view>
+          <view wx:elif="{{item.type !== 'taxi' && item.locationStart}}" class="item-route">{{item.locationStart}}</view>
           <view wx:if="{{item.airlineName}}" class="item-detail item-airline">{{item.airlineName}}</view>
           <view wx:if="{{item.transportNo}}" class="item-detail">{{item.transportNo}}</view>
           <view wx:if="{{item.terminalLabel}}" class="item-detail">{{item.terminalLabel}}</view>
           <view wx:if="{{item.travelClassLabel}}" class="item-detail">舱位 / 席别：{{item.travelClassLabel}}</view>
           <view wx:if="{{item.hotelMetaLabel}}" class="item-detail">{{item.hotelMetaLabel}}</view>
           <view wx:if="{{item.durationLabel}}" class="item-detail">{{item.durationLabel}}</view>
-          <view wx:if="{{item.priceLabel}}" class="item-price">{{item.priceLabel}}</view>
+          <view wx:if="{{item.type !== 'taxi' && item.priceLabel}}" class="item-price">{{item.priceLabel}}</view>
           <view wx:if="{{item.isWaitingToBook}}" class="booking-box">
             <view>预计开售：{{item.expectedSaleAt || '尚未填写'}}</view>
             <view wx:if="{{item.preferredSeatClass}}">期望席别：{{item.preferredSeatClass}}</view>

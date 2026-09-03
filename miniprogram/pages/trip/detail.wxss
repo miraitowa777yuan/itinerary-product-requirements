@@ -346,7 +346,7 @@
 }
 
 .timeline-row--taxi {
-  min-height: 156rpx;
+  min-height: 104rpx;
 }
 
 .timeline-content {
@@ -466,9 +466,12 @@
 }
 
 .item-card--taxi {
-  margin-bottom: 14rpx;
-  padding: 18rpx 24rpx;
+  margin: 0 0 10rpx 10rpx;
+  padding: 12rpx 16rpx;
   border-left-color: #c28a3c;
+  border-left-width: 6rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 5rpx 16rpx rgba(32, 37, 34, 0.04);
 }
 
 .item-card--intercity_bus {
@@ -551,6 +554,15 @@
   background: #eef1f2;
 }
 
+.item-topline--taxi {
+  min-height: 28rpx;
+}
+
+.item-card--taxi .item-type {
+  padding: 2rpx 8rpx;
+  font-size: 18rpx;
+}
+
 .status-pill {
   padding: 6rpx 14rpx;
   border-radius: 999rpx;
@@ -572,9 +584,12 @@
 }
 
 .item-card--taxi .item-title {
-  margin-top: 12rpx;
-  font-size: 27rpx;
-  line-height: 1.35;
+  overflow: hidden;
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .item-price {
@@ -584,9 +599,10 @@
   font-weight: 700;
 }
 
-.item-card--taxi .item-price {
-  margin-top: 8rpx;
-  font-size: 24rpx;
+.item-card--taxi .item-price--taxi-inline {
+  margin: 0;
+  color: #a66f20;
+  font-size: 20rpx;
 }
 
 .item-route,
@@ -598,9 +614,9 @@
 
 .item-card--taxi .item-route,
 .item-card--taxi .item-detail {
-  margin-top: 6rpx;
-  font-size: 21rpx;
-  line-height: 1.4;
+  margin-top: 4rpx;
+  font-size: 19rpx;
+  line-height: 1.2;
 }
 
 .item-airline {
